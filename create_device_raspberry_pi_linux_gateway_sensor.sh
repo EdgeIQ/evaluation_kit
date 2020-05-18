@@ -40,6 +40,10 @@ EOF
 )
 
 # Create Modbus Translator
+# valid type: template, javascript
+# * template - use Go lang template processing with the following template variable
+#   - output - raw data coming as string from ingestor protocol processing
+# see also https://documentation.machineshop.io/api_docs/translators
 MODBUS_TRANSLATOR_RESULT=$(
   curl --silent --request POST \
     "${BASE_URL}/translators" \
@@ -60,6 +64,7 @@ printf "\nModbus Translator\n %s \n" "${MODBUS_TRANSLATOR_RESULT}"
 MODBUS_TRANSLATOR_ID=$(jq --raw-output '._id' <<<"${MODBUS_TRANSLATOR_RESULT}")
 
 # Create Modbus Ingestor
+# see also https://documentation.machineshop.io/api_docs/ingestors
 MODBUS_INGESTOR_RESULT=$(
   curl --silent --request POST \
     "${BASE_URL}/ingestors" \
@@ -144,6 +149,7 @@ printf "\nSensor Device\n %s \n" "${SENSOR_DEVICE_RESULT}"
 SENSOR_DEVICE_ID=$(jq --raw-output '._id' <<<"${SENSOR_DEVICE_RESULT}")
 
 # Create Relay Rule
+# see also https://documentation.machineshop.io/api_docs/rules
 RELAY_RULE_RESULT=$(
   curl --silent --request POST \
     "${BASE_URL}/rules" \
@@ -172,6 +178,7 @@ curl --silent --request PUT \
   --write-out '\nRelay Rule Associate status %{http_code}\n'
 
 # Create HTTP forward rule
+# see also https://documentation.machineshop.io/api_docs/rules
 HTTP_RULE_RESULT=$(
   curl --silent --request POST \
     "${BASE_URL}/rules" \
