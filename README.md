@@ -15,6 +15,8 @@ These scripts will create a `cleanup-poc-<timestamp>.sh` file that contains API 
 
 > Warning: these test scripts do not currently protect against creating duplicate artifacts, nor do they detect if devices are present with the same target Unique ID. EdgeIQ will prevent you from creating duplicate devices with the same unique ID (which is good), however this may cause issues with the correct configuration by the scripts.
 
+There is a helper script [`list_entities.sh`](list_eentitties.sh) that will display all the various EdgeIQ objects you have access to within your account.
+
 Requirements to run these scripts:
 
 * `curl` - tested against curl version 7.64.1
@@ -35,3 +37,5 @@ wget --quiet --output-document='install.sh' \
   --make 'rpf' --model 'rpi' \
   --url 'https://machineshopapi.com/api/v1/platform/installers/rpf/rpi/edge-2.6.1.run'
 ```
+
+The EdgeIQ local service is installed as a `systemd` managed service called `edge.service` so for example you can stop it using this command, `sudo systemctl stop edge`. The EdgeIQ local service is installed into `/opt/edge` and log files are located in a day time stamped file, e.g. `/opt/edge/log/edge.log.2020-05-18`.

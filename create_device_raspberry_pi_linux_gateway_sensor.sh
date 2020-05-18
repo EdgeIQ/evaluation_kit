@@ -27,27 +27,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 source "${SCRIPT_DIR}/setenv.sh"
 
-# URL for EdgeIQ API server; you should not change
-BASE_URL='https://machineshopapi.com/api/v1/platform'
-
-# ADMIN_EMAIL='<your EdgeIQ username>'
-# ADMIN_PASSWORD='<your EdgeIQ password>'
-
-# EdgeIQ local service uses MAC address of first ethernet interface reported by `ifconfig`
-# GATEWAY_UNIQUE_ID='<Unique id for Gateway>'
-
-# Account unique id for Modbus Sensor
-SENSOR_UNIQUE_ID=${SENSOR_UNIQUE_ID:-"$(whoami)-1234"}
-
-# IP Address of Modbus TCP sensor/simulator
-# MODBUS_SENSOR_IP='<IP address for Modbus sensor>'
-
-# Port numberr for Modbus TCP sensor/simulator
-MODBUS_SENSOR_PORT=${MODBUS_SENSOR_PORT:-502}
-
-# This script configures EdgeIQ local service to forward Modbus reports as HTTP PUT messages to the following URL
-HTTP_LISTENER_URL=${HTTP_LISTENER_URL:-"http://$MODBUS_SENSOR_IP:5005"}
-
 # Get temporaray session token
 SESSION_API_KEY=$(
   curl --silent --request POST \
@@ -59,43 +38,6 @@ SESSION_API_KEY=$(
 }
 EOF
 )
-
-# printf "\nDevices\n"
-
-# curl --silent --request GET \
-#   "${BASE_URL}/devices" \
-#   --header "Authorization: ${SESSION_API_KEY}" \
-#   --header 'Accept: application/json'
-
-# printf "\nDevice Types\n"
-
-# curl --silent --request GET \
-#   "${BASE_URL}/device_types" \
-#   --header "Authorization: ${SESSION_API_KEY}" \
-#   --header 'Accept: application/json'
-
-# printf "\nIngestors\n"
-
-# curl --silent --request GET \
-#   "${BASE_URL}/ingestors" \
-#   --header "Authorization: ${SESSION_API_KEY}" \
-#   --header 'Accept: application/json'
-
-# printf "\nTranslators\n"
-
-# curl --silent --request GET \
-#   "${BASE_URL}/translators" \
-#   --header "Authorization: ${SESSION_API_KEY}" \
-#   --header 'Accept: application/json'
-
-# printf "\nRules\n"
-
-# curl --silent --request GET \
-#   "${BASE_URL}/rules" \
-#   --header "Authorization: ${SESSION_API_KEY}" \
-#   --header 'Accept: application/json'
-
-# exit
 
 # Create Modbus Translator
 MODBUS_TRANSLATOR_RESULT=$(
@@ -175,6 +117,7 @@ printf "\nSensor Device Type\n %s \n" "${SENSOR_DEVICE_TYPE_RESULT}"
 SENSOR_DEVICE_TYPE_ID=$(jq --raw-output '._id' <<<"${SENSOR_DEVICE_TYPE_RESULT}")
 
 # Create Sensor Device
+# valid log level values: trace, debug, info, warn, error, critical
 SENSOR_DEVICE_RESULT=$(
   curl --silent --request POST \
     "${BASE_URL}/devices" \
@@ -186,7 +129,12 @@ SENSOR_DEVICE_RESULT=$(
   "device_type_id": "${SENSOR_DEVICE_TYPE_ID}",
   "unique_id": "${SENSOR_UNIQUE_ID}",
   "ingestor_ids": [ "${MODBUS_INGESTOR_ID}" ],
-  "tags": [ "poc" ]
+  "tags": [ "poc" ],
+  "log_config": {
+      "local_level": "debug",
+      "forward_level": "error",
+      "forward_frequency_limit": 60
+    }
 }
 EOF
 )
@@ -287,6 +235,9 @@ printf "\nGateway Device Type\n %s \n" "${GATEWAY_DEVICE_TYPE_RESULT}"
 GATEWAY_DEVICE_TYPE_ID=$(jq --raw-output '._id' <<<"${GATEWAY_DEVICE_TYPE_RESULT}")
 
 # Create Gateway Device
+# valid log level values: trace, debug, info, warn, error, critical
+# valid heartbeat_values: cell_signal, cell_usage, sim_card, connections, wifi_clients, cpu_usage, ram_usage, disk_size, disk_free, disk_usage, custom
+# heartbeat_period is number of seconds
 GATEWAY_DEVICE_RESULT=$(
   curl --silent --request POST \
     "${BASE_URL}/devices" \
@@ -300,7 +251,12 @@ GATEWAY_DEVICE_RESULT=$(
   "heartbeat_period": 120,
   "heartbeat_values": [ "cpu_usage" ],
   "attached_device_ids": [ "${SENSOR_DEVICE_ID}" ],
-  "tags": [ "poc" ]
+  "tags": [ "poc" ],
+  "log_config": {
+      "local_level": "debug",
+      "forward_level": "error",
+      "forward_frequency_limit": 60
+    }
 }
 EOF
 )

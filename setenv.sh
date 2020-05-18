@@ -2,6 +2,10 @@
 
 set -eu
 
+# URL for EdgeIQ API server; you should not change
+export BASE_URL='https://machineshopapi.com/api/v1/platform'
+
+# Your EdgeIQ credentials
 export ADMIN_EMAIL='<your EdgeIQ username>'
 export ADMIN_PASSWORD='<your EdgeIQ password>'
 
