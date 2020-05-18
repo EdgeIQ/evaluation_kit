@@ -1,2 +1,2 @@
 cleanup-poc-*.sh
-setenv.sh
+setenv_private.sh
