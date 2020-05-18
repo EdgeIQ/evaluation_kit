@@ -9,6 +9,8 @@ Included are two different ways to configure EdgeIQ to manage devices.
 * Managed gateway device AND managed sensor device as Modbus Sensor. Sensor devices are discreet managed entities that allow the operator to see its status and send commands in isolation of other sensors.
   * [`create_device_raspberry_pi_linux_gateway_sensor.sh`](create_device_raspberry_pi_linux_gateway_sensor.sh)
 
+These scripts source in [`setenv.sh`](setenv.sh) to make it easier to set your environment variables once.
+
 These scripts will create a `cleanup-poc-<timestamp>.sh` file that contains API commands to delete EdgeIQ artifacts created by the create script. The cleanup scripts will delete themselves upon successful completion.
 
 > Warning: these test scripts do not currently protect against creating duplicate artifacts, nor do they detect if devices are present with the same target Unique ID. EdgeIQ will prevent you from creating duplicate devices with the same unique ID (which is good), however this may cause issues with the correct configuration by the scripts.

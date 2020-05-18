@@ -22,21 +22,31 @@ function print_error() {
 
 trap print_error ERR
 
+# Get directory this script is located in to access script local files
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+
+source "${SCRIPT_DIR}/setenv.sh"
+
 # URL for EdgeIQ API server; you should not change
 BASE_URL='https://machineshopapi.com/api/v1/platform'
 
 # ADMIN_EMAIL='<your EdgeIQ username>'
-# ADMIN_PASSWORD='<your EdgeIQ password'
+# ADMIN_PASSWORD='<your EdgeIQ password>'
 
 # EdgeIQ local service uses MAC address of first ethernet interface reported by `ifconfig`
-# GATEWAY_UNIQUE_ID='<Unique id forr Gateway>'
+# GATEWAY_UNIQUE_ID='<Unique id for Gateway>'
 
-# SENSOR_UNIQUE_ID='<Unique id for sensor>'
+# Account unique id for Modbus Sensor
+SENSOR_UNIQUE_ID=${SENSOR_UNIQUE_ID:-"$(whoami)-1234"}
 
+# IP Address of Modbus TCP sensor/simulator
 # MODBUS_SENSOR_IP='<IP address for Modbus sensor>'
 
+# Port numberr for Modbus TCP sensor/simulator
+MODBUS_SENSOR_PORT=${MODBUS_SENSOR_PORT:-502}
+
 # This script configures EdgeIQ local service to forward Modbus reports as HTTP PUT messages to the following URL
-# HTTP_LISTENER_URL='<URL for HTTP listener>'
+HTTP_LISTENER_URL=${HTTP_LISTENER_URL:-"http://$MODBUS_SENSOR_IP:5005"}
 
 # Get temporaray session token
 SESSION_API_KEY=$(
@@ -95,7 +105,7 @@ MODBUS_TRANSLATOR_RESULT=$(
     --header 'Accept: application/json' \
     --data @- <<EOF
 {
-  "name": "POC Modbus Translator",
+  "name": "POC $(whoami)'s Modbus Translator",
   "type": "template",
   "cloud_translator": false,
   "script": "{\n\t\t\"device_id\": \"${SENSOR_UNIQUE_ID}\",\n\t\t\"payload\": {\n\t\t\t\"coil_status\": {{.output}}\n\t\t}\n}"
@@ -115,7 +125,7 @@ MODBUS_INGESTOR_RESULT=$(
     --header 'Accept: application/json' \
     --data @- <<EOF
 {
-  "name": "POC Modbus Ingestor",
+  "name": "POC $(whoami)'s Modbus Ingestor",
   "cloud_translator": false,
   "listener_type": "tcp_modbus",
     "listener": {
@@ -129,7 +139,7 @@ MODBUS_INGESTOR_RESULT=$(
         "value": 0
       },
       "poll_interval": 5,
-      "port": 502,
+      "port": ${MODBUS_SENSOR_PORT},
       "slave_id": 1,
       "timeout": 5
     },
@@ -151,7 +161,7 @@ SENSOR_DEVICE_TYPE_RESULT=$(
     --header 'Accept: application/json' \
     --data @- <<EOF
 {
-  "name": "POC Modbus Sensor",
+  "name": "POC $(whoami)'s Modbus Sensor",
   "long_description": "",
   "manufacturer": "machineshop",
   "model": "sensor",
@@ -172,7 +182,7 @@ SENSOR_DEVICE_RESULT=$(
     --header 'Accept: application/json' \
     --data @- <<EOF
 {
-  "name": "POC Modbus Sensor",
+  "name": "POC $(whoami)'s Modbus Sensor",
   "device_type_id": "${SENSOR_DEVICE_TYPE_ID}",
   "unique_id": "${SENSOR_UNIQUE_ID}",
   "ingestor_ids": [ "${MODBUS_INGESTOR_ID}" ],
@@ -193,7 +203,7 @@ RELAY_RULE_RESULT=$(
     --header 'Accept: application/json' \
     --data @- <<EOF
 {
-  "description": "POC Relay All to Cloud",
+  "description": "POC $(whoami)'s Relay All to the Cloud",
   "active": true,
   "cloud_rule": false,
   "then_actions": [ { "type": "relay" } ],
@@ -221,7 +231,7 @@ HTTP_RULE_RESULT=$(
     --header 'Accept: application/json' \
     --data @- <<EOF
 {
-  "description": "POC HTTP forward",
+  "description": "POC $(whoami)'s HTTP forward",
   "active": true,
   "cloud_rule": false,
   "then_actions": [
@@ -257,7 +267,7 @@ GATEWAY_DEVICE_TYPE_RESULT=$(
     --header 'Accept: application/json' \
     --data @- <<EOF
 {
-  "name": "POC Raspberry Pi Linux armv7+",
+  "name": "POC $(whoami)'s Raspberry Pi Linux armv7+",
   "long_description": "",
   "manufacturer": "rpf",
   "model": "rpi",
@@ -284,7 +294,7 @@ GATEWAY_DEVICE_RESULT=$(
     --header 'Accept: application/json' \
     --data @- <<EOF
 {
-  "name": "POC Raspberry Pi Linux armv7+",
+  "name": "POC $(whoami)'s Raspberry Pi Linux armv7+",
   "device_type_id": "${GATEWAY_DEVICE_TYPE_ID}",
   "unique_id": "${GATEWAY_UNIQUE_ID}",
   "heartbeat_period": 120,
