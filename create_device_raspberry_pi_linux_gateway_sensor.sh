@@ -137,7 +137,7 @@ SENSOR_DEVICE_RESULT=$(
   "ingestor_ids": [ "${MODBUS_INGESTOR_ID}" ],
   "tags": [ "poc" ],
   "log_config": {
-      "local_level": "debug",
+      "local_level": "error",
       "forward_level": "error",
       "forward_frequency_limit": 60
     }
@@ -261,7 +261,7 @@ GATEWAY_DEVICE_RESULT=$(
   "attached_device_ids": [ "${SENSOR_DEVICE_ID}" ],
   "tags": [ "poc" ],
   "log_config": {
-      "local_level": "debug",
+      "local_level": "error",
       "forward_level": "error",
       "forward_frequency_limit": 60
     }

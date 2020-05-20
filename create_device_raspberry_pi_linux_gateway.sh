@@ -146,7 +146,7 @@ GATEWAY_DEVICE_RESULT=$(
   "ingestor_ids": [ "${MODBUS_INGESTOR_ID}" ],
   "tags": [ "poc" ],
   "log_config": {
-      "local_level": "debug",
+      "local_level": "error",
       "forward_level": "error",
       "forward_frequency_limit": 60
     }
