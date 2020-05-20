@@ -49,47 +49,25 @@ SESSION_API_KEY=$(
     "password=${ADMIN_PASSWORD}" | jq --raw-output '.session_token'
 )
 
-printf "\nDevices\n"
+printf "\nSensor Reports\n"
 
-# curl --silent --request GET \
-#   "${BASE_URL}/devices" \
+# REPORTS_RESPONSE=$(curl --silent --request GET \
+#   "${BASE_URL}/reports" \
 #   --header "Authorization: ${SESSION_API_KEY}" \
-#   --header 'Accept: application/json'
-http --json GET "${BASE_URL}/devices" \
-  "Authorization:${SESSION_API_KEY}"
+#   --header 'Accept: application/json' \
+#   --get \
+#   --data-urlencode 'page_meta=true' \
+#   --data-urlencode "device_name=${SENSOR_UNIQUE_ID}"
+# )
+REPORTS_RESPONSE=$(
+  http --json --body GET "${BASE_URL}/reports" \
+    "Authorization:${SESSION_API_KEY}" \
+    'page_meta==true' \
+    "device_name==${SENSOR_UNIQUE_ID}"
+)
 
-printf "\nDevice Types\n"
+printf "\nNumber of values returned: %s\n" "$(jq --raw-output '.total' <<<"${REPORTS_RESPONSE}")"
 
-# curl --silent --request GET \
-#   "${BASE_URL}/device_types" \
-#   --header "Authorization: ${SESSION_API_KEY}" \
-#   --header 'Accept: application/json'
-http --json GET "${BASE_URL}/device_types" \
-  "Authorization:${SESSION_API_KEY}"
+printf "\nLast Payload %s\n" "$(jq --color-output '.resources[0] | {device_datetime,payload}' <<<"${REPORTS_RESPONSE}")"
 
-printf "\nIngestors\n"
-
-# curl --silent --request GET \
-#   "${BASE_URL}/ingestors" \
-#   --header "Authorization: ${SESSION_API_KEY}" \
-#   --header 'Accept: application/json'
-http --json GET "${BASE_URL}/ingestors" \
-  "Authorization:${SESSION_API_KEY}"
-
-printf "\nTranslators\n"
-
-# curl --silent --request GET \
-#   "${BASE_URL}/translators" \
-#   --header "Authorization: ${SESSION_API_KEY}" \
-#   --header 'Accept: application/json'
-http --json GET "${BASE_URL}/translators" \
-  "Authorization:${SESSION_API_KEY}"
-
-printf "\nRules\n"
-
-# curl --silent --request GET \
-#   "${BASE_URL}/rules" \
-#   --header "Authorization: ${SESSION_API_KEY}" \
-#   --header 'Accept: application/json'
-http --json GET "${BASE_URL}/rules" \
-  "Authorization:${SESSION_API_KEY}"
+# printf "\nReports:\n %s" "$(jq --color-output <<<"${REPORTS_RESPONSE}")"

@@ -18,7 +18,9 @@ These scripts will create a `cleanup-poc-<timestamp>.sh` file that contains API 
 There are some helper scripts:
 
 * [`list_entities.sh`](list_entities.sh) that will display all the various EdgeIQ objects you have access to within your account.
-* [`query_entities.sh`](query_entities.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `poc` tag. More details on Query parameters [here](https://documentation.machineshop.io/guides/api_overview)
+* [`query_devices.sh`](query_devices.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `poc` tag. More details on Query parameters [here](https://documentation.machineshop.io/guides/api_overview)
+* [`query_reports.sh`](query_reports.sh) gets the latest Sensor data
+* [`install_diagslave.sh`](install_diagslave.sh) is an example of how to install diagslave Modbus simulator as a systemd service. Must be run as root, e.g., `sudo ./install_diagslave.sh`.
 
 Requirements to run these scripts:
 
@@ -35,10 +37,10 @@ To install EdgeIQ local service on a Raspberry Pi 3 or 4 running Linux, execute 
 
 ```bash
 wget --quiet --output-document='install.sh' \
-  'https://machineshopapi.com/api/v1/platform/installers/install.sh' \
+  'https://api.edgeiq.io/api/v1/platform/installers/install.sh' \
   && sudo /bin/bash install.sh --company '<your EdgeIQ account ID>' \
   --make 'rpf' --model 'rpi' \
-  --url 'https://machineshopapi.com/api/v1/platform/installers/rpf/rpi/edge-2.6.1.run'
+  --url 'https://api.edgeiq.io/api/v1/platform/installers/rpf/rpi/edge-2.6.2.run'
 ```
 
 The EdgeIQ local service is installed as a `systemd` managed service called `edge.service` so for example you can stop it using this command, `sudo systemctl stop edge`. The EdgeIQ local service is installed into `/opt/edge` and log files are located in a day time stamped file, e.g. `/opt/edge/log/edge.log.2020-05-18`.
