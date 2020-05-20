@@ -133,6 +133,7 @@ SENSOR_DEVICE_RESULT=$(
   "name": "POC $(whoami)'s Modbus Sensor",
   "device_type_id": "${SENSOR_DEVICE_TYPE_ID}",
   "unique_id": "${SENSOR_UNIQUE_ID}",
+  "heartbeat_period": 60,
   "ingestor_ids": [ "${MODBUS_INGESTOR_ID}" ],
   "tags": [ "poc" ],
   "log_config": {
