@@ -15,7 +15,10 @@ These scripts will create a `cleanup-poc-<timestamp>.sh` file that contains API 
 
 > Warning: these test scripts do not currently protect against creating duplicate artifacts, nor do they detect if devices are present with the same target Unique ID. EdgeIQ will prevent you from creating duplicate devices with the same unique ID (which is good), however this may cause issues with the correct configuration by the scripts.
 
-There is a helper script [`list_entities.sh`](list_entities.sh) that will display all the various EdgeIQ objects you have access to within your account.
+There are some helper scripts:
+
+* [`list_entities.sh`](list_entities.sh) that will display all the various EdgeIQ objects you have access to within your account.
+* [`query_entities.sh`](query_entities.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `poc` tag. More details on Query parameters [here](https://documentation.machineshop.io/guides/api_overview)
 
 Requirements to run these scripts:
 
