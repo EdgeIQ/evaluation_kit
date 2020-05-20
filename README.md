@@ -15,7 +15,7 @@ These scripts will create a `cleanup-poc-<timestamp>.sh` file that contains API 
 
 > Warning: these test scripts do not currently protect against creating duplicate artifacts, nor do they detect if devices are present with the same target Unique ID. EdgeIQ will prevent you from creating duplicate devices with the same unique ID (which is good), however this may cause issues with the correct configuration by the scripts.
 
-There is a helper script [`list_entities.sh`](list_eentitties.sh) that will display all the various EdgeIQ objects you have access to within your account.
+There is a helper script [`list_entities.sh`](list_entities.sh) that will display all the various EdgeIQ objects you have access to within your account.
 
 Requirements to run these scripts:
 
