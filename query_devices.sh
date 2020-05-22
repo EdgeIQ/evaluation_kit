@@ -52,7 +52,7 @@ GATEWAY_DEVICE_RESPONSE=$(
   http --json --body GET "${BASE_URL}/devices" \
     "Authorization:${SESSION_API_KEY}" \
     'page_meta==true' \
-    "unique_id=${GATEWAY_UNIQUE_ID}"
+    "unique_id==${GATEWAY_UNIQUE_ID}"
 )
 
 printf "\nNumber of values returned: %s\n" "$(jq --raw-output '.total' <<<"${GATEWAY_DEVICE_RESPONSE}")"
@@ -70,7 +70,7 @@ SENSOR_DEVICE_RESPONSE=$(
   http --json --body GET "${BASE_URL}/devices" \
     "Authorization:${SESSION_API_KEY}" \
     'page_meta==true' \
-    "unique_id=${SENSOR_UNIQUE_ID}"
+    "unique_id==${SENSOR_UNIQUE_ID}"
 )
 
 printf "\nNumber of values returned: %s\n" "$(jq --raw-output '.total' <<<"${SENSOR_DEVICE_RESPONSE}")"
@@ -82,13 +82,26 @@ printf "\nSensor Device\n %s\n" "$(jq --color-output <<<"${SENSOR_DEVICE}")"
 # valid values: online, offline, idle, never_reported
 printf "\nSensor Device Heartbeat Status: %s\n" "$(jq --raw-output '.heartbeat_status' <<<"${SENSOR_DEVICE}")"
 
-printf "\nDevice Query: Tags CONTAINS 'POC'\n"
+printf "\nSensor Device with 'unique_id' less than 'dd'\n"
+
+SENSOR_DEVICE_RESPONSE=$(
+  http --json --body GET "${BASE_URL}/devices" \
+    "Authorization:${SESSION_API_KEY}" \
+    'page_meta==true' \
+    "unique_id_lt==dd"
+)
+
+printf "\nNumber of values returned: %s\n" "$(jq --raw-output '.total' <<<"${SENSOR_DEVICE_RESPONSE}")"
+
+printf "\nSensor Device\n %s\n" "$(jq --color-output '[.resources[] | .unique_id]' <<<"${SENSOR_DEVICE_RESPONSE}")"
+
+printf "\nDevice Query: 'tags' array CONTAINS 'POC'\n"
 
 TAG_QUERY_RESPONSE=$(
   http --json --body GET "${BASE_URL}/devices" \
     "Authorization:${SESSION_API_KEY}" \
     'page_meta==true' \
-    'tags_inc=poc'
+    'tags_inc==poc'
 )
 
 printf "\nNumber of values returned: %s\n" "$(jq --raw-output '.total' <<<"${TAG_QUERY_RESPONSE}")"
