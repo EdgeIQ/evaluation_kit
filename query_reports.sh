@@ -59,4 +59,5 @@ printf "\nNumber of values returned: %s\n" "$(jq --raw-output '.total' <<<"${REP
 
 printf "\nLast Payload %s\n" "$(jq --color-output '.resources[0] | {device_datetime,payload}' <<<"${REPORTS_RESPONSE}")"
 
+# Uncomment to see everything
 # printf "\nReports:\n %s" "$(jq --color-output <<<"${REPORTS_RESPONSE}")"
