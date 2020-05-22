@@ -4,11 +4,13 @@ set -eu
 
 DIAGSLAVE_HOME='/opt/diagslave'
 
+mkdir -p "${DIAGSLAVE_HOME}"
+
+cd "${DIAGSLAVE_HOME}"
+
 wget 'https://www.modbusdriver.com/downloads/diagslave.tgz'
 
-mkdir -p "${DIAGSLAVE_HOME}/log"
-
-tar xzf diagslave.tgz --directory '/opt'
+tar xzf diagslave.tgz
 
 rm diagslave.tgz
 
@@ -24,13 +26,15 @@ Type=simple
 KillMode=process
 Restart=always
 ExecStart=${DIAGSLAVE_HOME}/linux_arm-eabihf/diagslave -m tcp
-StandardOutput=journal
-StandardError=inherit
+# StandardOutput=journal+console
+# StandardError=journal+console
 KillMode=control-group
 
 [Install]
 WantedBy=multi-user.target
 EOF
+
+chmod 664 /etc/systemd/system/diagslave.service
 
 systemctl enable diagslave
 systemctl start diagslave

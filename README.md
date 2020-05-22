@@ -20,7 +20,7 @@ There are some helper scripts:
 * [`list_entities.sh`](list_entities.sh) that will display all the various EdgeIQ objects you have access to within your account.
 * [`query_devices.sh`](query_devices.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `poc` tag. More details on Query parameters [here](https://documentation.machineshop.io/guides/api_overview)
 * [`query_reports.sh`](query_reports.sh) gets the latest Sensor data
-* [`install_diagslave.sh`](install_diagslave.sh) is an example of how to install diagslave Modbus simulator as a systemd service. Must be run as root, e.g., `sudo ./install_diagslave.sh`.
+* [`install_diagslave.sh`](install_diagslave.sh) is an example of how to install diagslave Modbus simulator as a systemd service. Must be run as root, e.g., `sudo ./install_diagslave.sh`. You can then use `journalctl -f --all -u diagslave` to follow logs. Note the `--all` options overcomes the `[xxB blob data]` by converting the binary output from diagslave.
 
 Requirements to run these scripts:
 
