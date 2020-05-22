@@ -2,8 +2,8 @@
 
 # Assumes the following tools are installed
 # * curl - tested against version 7.64.1
-# * jq - test against version 1.6 (https://stedolan.github.io/jq)
-# * HTTPie - experimental support (https://httpie.org/)
+# * jq - tested against version 1.6 (https://stedolan.github.io/jq)
+# * HTTPie - tested against version 2.1.0 (https://httpie.org/)
 
 # Will exit script if we would use an uninitialised variable (nounset) or when a
 # simple command (not a control structure) fails (errexit)
@@ -33,33 +33,21 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "${SCRIPT_DIR}/setenv.sh"
 
 # Get temporaray session token
-# SESSION_API_KEY=$(
-#   curl --silent --request POST \
-#     "${BASE_URL}/user/authenticate" \
-#     --data @- <<EOF | jq --raw-output '.session_token'
-# {
-#   "email": "${ADMIN_EMAIL}",
-#   "password": "${ADMIN_PASSWORD}"
-# }
-# EOF
-# )
-SESSION_API_KEY=$(
+SESSION_AUTH_RESULT=$(
   http --json --body POST "${BASE_URL}/user/authenticate" \
     "email=${ADMIN_EMAIL}" \
-    "password=${ADMIN_PASSWORD}" | jq --raw-output '.session_token'
+    "password=${ADMIN_PASSWORD}"
 )
+
+if [[ "${SESSION_AUTH_RESULT}" == *'Not authorized'* ]]; then
+  printf "Invalid Credentials\n"
+  exit
+fi
+
+SESSION_API_KEY=$(jq --raw-output '.session_token' <<<"${SESSION_AUTH_RESULT}")
 
 printf "\nGateway Device\n"
 
-# GATEWAY_DEVICE_RESPONSE=$(
-#   curl --silent --request GET \
-#     "${BASE_URL}/devices" \
-#     --header "Authorization: ${SESSION_API_KEY}" \
-#     --header 'Accept: application/json' \
-#     --get \
-#     --data-urlencode 'page_meta=true' \
-#     --data-urlencode "unique_id=${GATEWAY_UNIQUE_ID}"
-# )
 GATEWAY_DEVICE_RESPONSE=$(
   http --json --body GET "${BASE_URL}/devices" \
     "Authorization:${SESSION_API_KEY}" \
@@ -78,15 +66,6 @@ printf "\nGateway Device Heartbeat Status: %s\n" "$(jq --raw-output '.heartbeat_
 
 printf "\nSensor Device\n"
 
-# SENSOR_DEVICE_RESPONSE=$(
-#   curl --silent --request GET \
-#     "${BASE_URL}/devices" \
-#     --header "Authorization: ${SESSION_API_KEY}" \
-#     --header 'Accept: application/json' \
-#     --get \
-#     --data-urlencode 'page_meta=true' \
-#     --data-urlencode "unique_id=${SENSOR_UNIQUE_ID}"
-# )
 SENSOR_DEVICE_RESPONSE=$(
   http --json --body GET "${BASE_URL}/devices" \
     "Authorization:${SESSION_API_KEY}" \
@@ -105,15 +84,6 @@ printf "\nSensor Device Heartbeat Status: %s\n" "$(jq --raw-output '.heartbeat_s
 
 printf "\nDevice Query: Tags CONTAINS 'POC'\n"
 
-# TAG_QUERY_RESPONSE=$(
-#   curl --silent --request GET \
-#     "${BASE_URL}/devices" \
-#     --header "Authorization: ${SESSION_API_KEY}" \
-#     --header 'Accept: application/json' \
-#     --get \
-#     --data-urlencode 'page_meta=true' \
-#     --data-urlencode "tags_inc=poc"
-# )
 TAG_QUERY_RESPONSE=$(
   http --json --body GET "${BASE_URL}/devices" \
     "Authorization:${SESSION_API_KEY}" \
