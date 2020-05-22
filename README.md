@@ -24,8 +24,9 @@ There are some helper scripts:
 
 Requirements to run these scripts:
 
-* `curl` - tested against curl version 7.64.1
+* ~~`curl` - tested against curl version 7.64.1~~
 * `jq` - tested against version 1.6. Installation and documentation at <https://stedolan.github.io/jq>
+* `HTTPie` - tested against version 2.1.0 (https://httpie.org/)
 
 These scripts were tested against the free [diagslave](https://www.modbusdriver.com/diagslave.html) Modbus simulator, e.g. `diagslave -m tcp`.
 
@@ -44,3 +45,9 @@ wget --quiet --output-document='install.sh' \
 ```
 
 The EdgeIQ local service is installed as a `systemd` managed service called `edge.service` so for example you can stop it using this command, `sudo systemctl stop edge`. The EdgeIQ local service is installed into `/opt/edge` and log files are located in a day time stamped file, e.g. `/opt/edge/log/edge.log.2020-05-18`.
+
+EdgeIQ Portal: <https://app.edgeiq.io>
+EdgeIQ API Base URL: <https://api.edgeiq.io/api/v1/platform>
+EdgeIQ Documentation: <https://documentation.machineshop.io/>
+
+Note: we renamed the company from MachineShop to EdgeIQ recently and are still in the process of updating all references to EdgeIQ.
