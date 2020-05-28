@@ -220,8 +220,42 @@ http --json --print=Hh PUT "${BASE_URL}/devices/${GATEWAY_DEVICE_ID}/rules/${HTT
 
 # Create cleanup script with unique name generated using num seconds since Jan 1 1970
 FILE_NAME="cleanup-poc-$(date '+%s').sh"
+
+# Expand environment variables
 cat <<EOF >"${FILE_NAME}" 
 #!/usr/bin/env bash
+
+GATEWAY_DEVICE_ID="${GATEWAY_DEVICE_ID}"
+GATEWAY_DEVICE_TYPE_ID="${GATEWAY_DEVICE_TYPE_ID}"
+MODBUS_INGESTOR_ID="${MODBUS_INGESTOR_ID}"
+MODBUS_TRANSLATOR_ID="${MODBUS_TRANSLATOR_ID}"
+RELAY_RULE_ID="${RELAY_RULE_ID}"
+HTTP_RULE_ID="${HTTP_RULE_ID}"
+
+FILE_NAME="${FILE_NAME}"
+EOF
+
+# Do NOT expand environment variables
+cat <<'EOF' >>"${FILE_NAME}"
+
+# Get directory this script is located in to access script local files
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+
+source "${SCRIPT_DIR}/setenv.sh"
+
+# Get temporaray session token
+SESSION_AUTH_RESULT=$(
+  http --json --body POST "${BASE_URL}/user/authenticate" \
+    "email=${ADMIN_EMAIL}" \
+    "password=${ADMIN_PASSWORD}"
+)
+
+if [[ "${SESSION_AUTH_RESULT}" == *'Not authorized'* ]]; then
+  printf "Invalid Credentials\n"
+  exit
+fi
+
+SESSION_API_KEY=$(jq --raw-output '.session_token' <<<"${SESSION_AUTH_RESULT}")
 
 http --json --print=Hh DELETE "${BASE_URL}/devices/${GATEWAY_DEVICE_ID}" \
   "Authorization:${SESSION_API_KEY}"
