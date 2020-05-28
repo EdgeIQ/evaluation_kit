@@ -218,7 +218,8 @@ http --json --print=Hh PUT "${BASE_URL}/devices/${GATEWAY_DEVICE_ID}/rules/${HTT
 
 # Create cleanup file
 
-FILE_NAME="cleanup-poc-$(date --iso-8601='seconds').sh"
+# Create cleanup script with unique name generated using num seconds since Jan 1 1970
+FILE_NAME="cleanup-poc-$(date '+%s').sh"
 cat <<EOF >"${FILE_NAME}" 
 #!/usr/bin/env bash
 
