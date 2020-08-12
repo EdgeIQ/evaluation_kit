@@ -12,15 +12,18 @@ export ADMIN_PASSWORD=${ADMIN_PASSWORD:-'<your EdgeIQ password>'}
 # EdgeIQ local service uses MAC address of first ethernet interface reported by `ifconfig`
 export GATEWAY_UNIQUE_ID=${GATEWAY_UNIQUE_ID:-'<Unique id for Gateway>'}
 
-# Account unique id for Modbus Sensor
-SENSOR_UNIQUE_ID=${SENSOR_UNIQUE_ID:-"$(whoami)-1234"}
-export SENSOR_UNIQUE_ID
+# IP Address of Gateway device
+export GATEWAY_IP=${GATEWAY_IP:-'<Gateway device IP>'}
 
-# IP Address of Modbus TCP sensor/simulator
-export MODBUS_SENSOR_IP=${MODBUS_SENSOR_IP:-'<IP address for Modbus sensor>'}
+# Gateway's EdgeIQ device type
+# * Raspberry PI - 'rpf'
+# * x86_64 - 'generic'
+export GATEWAY_MANUFACTURER='rpf'
 
-# Port numberr for Modbus TCP sensor/simulator
-export MODBUS_SENSOR_PORT=${MODBUS_SENSOR_PORT:-502}
+# Gateway's EdgeIQ device type
+# * Raspberry PI linux - 'rpi'
+# * x86_64 Linux - 'linux'
+export GATEWAY_MODEL='rpi'
 
-# This script configures EdgeIQ local service to forward Modbus reports as HTTP PUT messages to the following URL
-export HTTP_LISTENER_URL=${HTTP_LISTENER_URL:-"http://$MODBUS_SENSOR_IP:5005"}
+# EdgeIQ SmartEdge version
+export SMARTEDGE_VERSION='2.6.5'

@@ -3,6 +3,8 @@
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from optparse import OptionParser
+import requests
+from getmac import get_mac_address as gma
 
 
 class RequestHandler(BaseHTTPRequestHandler):
@@ -33,12 +35,25 @@ class RequestHandler(BaseHTTPRequestHandler):
         print("Request payload:", self.rfile.read(length))
         print("<----- Request End -----\n")
 
+        post_result()
+
         self.send_response(200)
         self.end_headers()
 
     do_PUT = do_POST
     do_DELETE = do_GET
 
+
+def post_result():
+    url = 'http://localhost:9000/api/v1/monitor/reports'
+    mac = gma()
+    obj = {'device_id': mac, 'payload': {'type': 'httpprint'}}
+    headers = {'Content-Type': 'application/json',
+               'Accept': 'application/json'}
+
+    x = requests.post(url, json=obj, headers=headers)
+
+    print("Response:", x.text)
 
 def main():
     port = 5005
