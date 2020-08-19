@@ -44,6 +44,7 @@ Notes:
 
 * These scripts were tested against the free [diagslave](https://www.modbusdriver.com/diagslave.html) Modbus simulator, e.g. `diagslave -m tcp`.
 * To use the included [`httpprint.py`](httpprint.py), you need to have a recent version of Python 3 installed. e.g. `python3 httpprint.py`
+* To see the `httpprint.py` output, run on the gateway device, e.g. Raspberry Pi, the following command `journalctl -f -all -u httpprint`.
 
 In `simple_gateway` subdirectory, run the following commands.
 
