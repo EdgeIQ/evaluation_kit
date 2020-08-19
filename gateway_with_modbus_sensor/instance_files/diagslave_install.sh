@@ -6,6 +6,10 @@ DIAGSLAVE_HOME='/opt/diagslave'
 
 DIAGSLAVE_ARCH='linux_arm-eabihf'
 case "$(uname --hardware-platform)" in
+  'aarch64')
+    DIAGSLAVE_ARCH='linux_arm-eabihf'
+    ;;
+
   'x86_64')
     DIAGSLAVE_ARCH='linux_x86-64'
     ;;
