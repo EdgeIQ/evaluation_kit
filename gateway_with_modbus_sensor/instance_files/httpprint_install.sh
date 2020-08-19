@@ -6,9 +6,6 @@ SERVICE_HOME='/home/ubuntu'
 
 PYTHON3=$(which python3)
 
-pip3 install requests
-pip3 install getmac
-
 service_name='httpprint'
 
 systemctl disable --now "${service_name}" > /dev/null 2>&1 || true # ignore errors
