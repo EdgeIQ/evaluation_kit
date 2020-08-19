@@ -34,10 +34,11 @@ SESSION_API_KEY=$(get_session_api_key)
 # valid type: template, javascript
 # * template - use Go lang template processing with the following template variable
 #   - output - raw data coming as string from ingestor protocol processing
+#   - gateway_unique_id - unique device id of 'gateway' type device Ingestor is associated with
 # see also https://dev.edgeiq.io/reference#post_translators
 script_template=$(cat <<EOF
 {
-  "device_id": "${GATEWAY_UNIQUE_ID}-modbus-1",
+  "device_id": "{{.gateway_unique_id}}",
   "payload": {
     "type": "modbus sensor",
     "coil_status": {{.output}}
@@ -107,97 +108,6 @@ MODBUS_INGESTOR_ID=$(jq --raw-output '._id' <<<"${modbus_ingestor_result}")
 
 INGESTOR_IDS+=( "${MODBUS_INGESTOR_ID}" )
 
-# Create Sensor Device Type
-# see also https://dev.edgeiq.io/reference#post_device_types
-sensor_device_type_result=$(
-curl --silent --request POST \
-  --url "${BASE_URL}/device_types" \
-  --header 'accept: application/json' \
-  --header "authorization: ${SESSION_API_KEY}" \
-  --header 'content-type: application/json' \
-  --data @- <<EOF
-{
-  "name": "Demo $(whoami)'s Modbus Sensor Device Type",
-  "long_description": "",
-  "manufacturer": "generic",
-  "model": "sensor",
-  "type": "sensor",
-    "capabilities": {
-    "network_connections": [],
-    "peripherals": [],
-    "firmware": {
-      "upgrade": false,
-      "backup": false
-    },
-    "actions": {
-      "notification": true,
-      "send_config": true,
-      "request_deployment_status": true,
-      "update_edge": true,
-      "update_firmware": false,
-      "log_level": true,
-      "log_config": true,
-      "log_upload": true,
-      "reboot": true,
-      "heartbeat": true,
-      "software_update": true,
-      "greengrass_initialize": false,
-      "greengrass_restart": false,
-      "greengrass_redeploy": false,
-      "log": true,
-      "sms": false,
-      "email": false,
-      "relay": true,
-      "http_request": true,
-      "mqtt": false,
-      "aws_iot": false,
-      "tcp": false,
-      "tcp_modbus": true,
-      "opcua": false,
-      "bacnet": false
-    }
-  },
-  "ingestor_ids": []
-}
-EOF
-)
-pretty_print_json "Sensor Device Type" "${sensor_device_type_result}"
-
-SENSOR_DEVICE_TYPE_ID=$(jq --raw-output '._id' <<<"${sensor_device_type_result}")
-
-DEVICE_TYPE_IDS+=( "${SENSOR_DEVICE_TYPE_ID}" )
-
-# Create Sensor Device
-# valid log level values: trace, debug, info, warn, error, critical
-# see also https://dev.edgeiq.io/reference#post_devices
-sensor_device_result=$(
-  curl --silent --request POST \
-    --url "${BASE_URL}/devices" \
-    --header 'accept: application/json' \
-    --header "authorization: ${SESSION_API_KEY}" \
-    --header 'content-type: application/json' \
-    --data @- <<EOF
-{
-  "name": "Demo $(whoami)'s Modbus Sensor",
-  "device_type_id": "${SENSOR_DEVICE_TYPE_ID}",
-  "unique_id": "${GATEWAY_UNIQUE_ID}-modbus-1",
-  "heartbeat_period": 60,
-  "ingestor_ids": [ "${MODBUS_INGESTOR_ID}" ],
-  "tags": [ "demo" ],
-  "log_config": {
-      "local_level": "error",
-      "forward_level": "error",
-      "forward_frequency_limit": 60
-    }
-}
-EOF
-)
-pretty_print_json 'Device' "${sensor_device_result}"
-
-SENSOR_DEVICE_ID=$(jq --raw-output '._id' <<<"${sensor_device_result}")
-
-DEVICE_IDS+=( "${SENSOR_DEVICE_ID}" )
-
 # Create Gateway Device Type
 # see also https://dev.edgeiq.io/reference#post_device_types
 gateway_device_type_result=$(
@@ -213,6 +123,7 @@ curl --silent --request POST \
   "manufacturer": "${GATEWAY_MANUFACTURER}",
   "model": "${GATEWAY_MODEL}",
   "type": "gateway",
+  "ingestor_ids": [ "${MODBUS_INGESTOR_ID}" ],
   "capabilities": {
     "network_connections": [
       { "type": "ethernet-wan", "name": "eth0" }
@@ -278,7 +189,7 @@ gateway_device_result=$(
   "heartbeat_period": 120,
   "heartbeat_values": [ "cpu_usage" ],
   "ingestor_ids": [],
-  "attached_device_ids": [ "${SENSOR_DEVICE_ID}" ],
+  "attached_device_ids": [],
   "tags": [ "demo" ],
   "log_config": {
     "local_level": "error",
@@ -318,16 +229,10 @@ RELAY_RULE_ID=$(jq --raw-output '._id' <<<"${relay_rule_result}")
 
 RULE_IDS+=( "${RELAY_RULE_ID}" )
 
-# Associate Rule with Sensor
+# Associate Rule with Gateway
 # see also https://dev.edgeiq.io/reference#put_attach_rule_to_device_type
 # Note: you can also associate Rules with individual Devices
-printf "\nAssociate Relay Rule with Sensor and Gateway Device Type\n"
-curl --silent --request PUT \
-  --url "${BASE_URL}/device_types/${SENSOR_DEVICE_TYPE_ID}/rules/${RELAY_RULE_ID}" \
-  --header 'accept: application/json' \
-  --header "authorization: ${SESSION_API_KEY}" \
-  --header 'content-type: application/json'
-
+printf "\nAssociate Relay Rule with Gateway Device Type\n"
 curl --silent --request PUT \
   --url "${BASE_URL}/device_types/${GATEWAY_DEVICE_TYPE_ID}/rules/${RELAY_RULE_ID}" \
   --header 'accept: application/json' \
@@ -351,12 +256,16 @@ http_rule_result=$(
     {
       "type": "http_request",
       "send_to": "http://localhost:5005/",
-      "body_template": "coil_status is {{.report.payload.coil_status}}",
+      "body_template": "coil_status for {{.device.name}} is {{.report.payload.coil_status}}",
       "method": "put",
       "headers": { "Content-Type": "text/plain" }
     }
   ],
-  "rule_condition": { "type": "true" }
+  "rule_condition": {
+    "type": "equal",
+    "property": "type",
+    "value": "modbus sensor"
+  }
 }
 EOF
 )
@@ -366,10 +275,12 @@ HTTP_RULE_ID=$(jq --raw-output '._id' <<<"${http_rule_result}")
 
 RULE_IDS+=( "${HTTP_RULE_ID}" )
 
-# Associate HTTP Forward Rule with Sensor Device Type
-printf "\nAssociate HTTP Rule with Sensor Device Type\n"
+# Associate HTTP Forward Rule with Gateway Device Type
+# see also https://dev.edgeiq.io/reference#put_attach_rule_to_device_type
+# Note: you can also associate Rules with individual Devices
+printf "\nAssociate HTTP Rule with Gateway Device Type\n"
 curl --silent --request PUT \
-  --url "${BASE_URL}/device_types/${SENSOR_DEVICE_TYPE_ID}/rules/${HTTP_RULE_ID}" \
+  --url "${BASE_URL}/device_types/${GATEWAY_DEVICE_TYPE_ID}/rules/${HTTP_RULE_ID}" \
   --header 'accept: application/json' \
   --header "authorization: ${SESSION_API_KEY}" \
   --header 'content-type: application/json'
