@@ -2,9 +2,6 @@
 # ---------------------------------------------------------------------------
 # setup.sh - EdgeIQ Evaluation Kit Setup Script
 
-# Copyright 2020, root <root@raspberrypi>
-# All rights reserved.
-
 # Usage: setup.sh [-h|--help] [-v] [-eU] [-eP] [-gU] [-gI] [-eS]
 
 # Revision history:
@@ -84,9 +81,9 @@ while [[ -n $1 ]]; do
     -v)
       echo "Verbose logging" ;;
     -eU)
-      echo "EdgeIQ Username" ;;
+      echo "EdgeIQ API Username" ;;
     -eP)
-      echo "EdgeIQ Password" ;;
+      echo "EdgeIQ API Password" ;;
     -gU)
       echo "Gateway Unique ID (EdgeIQ local service uses MAC address of first ethernet interface reported by ifconfig" ;;
     -gI)
@@ -105,4 +102,3 @@ done
 # Main logic
 
 graceful_exit
-

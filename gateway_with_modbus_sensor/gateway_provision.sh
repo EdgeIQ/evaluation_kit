@@ -35,7 +35,7 @@ sleep 2
 
 ssh-keyscan -H "${GATEWAY_IP}" >> ~/.ssh/known_hosts
 
-ssh-copy-id -f "ubuntu@${GATEWAY_IP}"
+ssh-copy-id -f "$(whoami)@${GATEWAY_IP}"
 
 # Update instance with Python 3 support to httpprint listener
 ssh "$(whoami)@${GATEWAY_IP}" \
@@ -43,11 +43,11 @@ ssh "$(whoami)@${GATEWAY_IP}" \
 
 # copy files to device Instance
 scp -r "${SCRIPT_DIR}/instance_files/"* \
-  "$(whoami)@${GATEWAY_IP}:/home/ubuntu"
+  "$(whoami)@${GATEWAY_IP}:/home/$(whoami)"
 
 # install ModBus Server simulator
 ssh "$(whoami)@${GATEWAY_IP}" \
-  'sudo /bin/bash /home/ubuntu/diagslave_install.sh'
+  'sudo /bin/bash ~/diagslave_install.sh'
 
 # Install EdgeIQ SmartEdge
 EDGEIQ_INSTALL=$(cat <<EOF
@@ -69,4 +69,4 @@ ssh "$(whoami)@${GATEWAY_IP}" <<<"${EDGEIQ_INSTALL}"
 
 # install httpprint command
 ssh "$(whoami)@${GATEWAY_IP}" \
-  'sudo -H /bin/bash /home/ubuntu/httpprint_install.sh'
+  'sudo -H /bin/bash ~/httpprint_install.sh'
