@@ -9,7 +9,7 @@
 
 Update the [`setenv.sh`](setenv.sh) file with your
 
-* EdgeIQ username and passwordß
+* EdgeIQ username and password
 * Your gateway device MAC address and associated IP address
 * Configure EdgeIQ Device Type - defaults to Raspberry Pi 3/4 running recent Debian/Ubuntu linux
 
@@ -58,7 +58,7 @@ The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timesta
 
 There are some helper scripts:
 
-* [`list_entities.sh`](list_entities.sh) that will display all the various EdgeIQ objects you have access to within your account.
+* [`query_entities.sh`](query_entities.sh) that will display all the various EdgeIQ objects you have access to within your account.
 * [`query_devices.sh`](query_devices.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `poc` tag. More details on Query parameters [here](https://documentation.machineshop.io/guides/api_overview)
 * [`query_reports.sh`](query_reports.sh) gets the latest Sensor data
 * [`diagslave_install.sh`](diagslave_install.sh) is an example of how to install diagslave Modbus simulator as a systemd service. Must be run as root, e.g., `sudo ./diagslave_install.sh`. You can then use `journalctl -f --all -u diagslave` to follow logs. Note the `--all` options overcomes the `[xxB blob data]` by converting the binary output from diagslave.
