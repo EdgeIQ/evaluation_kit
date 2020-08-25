@@ -118,7 +118,7 @@ curl --silent --request POST \
   --header 'content-type: application/json' \
   --data @- <<EOF
 {
-  "name": "Demo $(whoami)'s Device Type",
+  "name": "Demo $(whoami)'s Gateway Device Type",
   "long_description": "",
   "manufacturer": "${GATEWAY_MANUFACTURER}",
   "model": "${GATEWAY_MODEL}",
@@ -164,7 +164,7 @@ curl --silent --request POST \
 }
 EOF
 )
-pretty_print_json 'Device Type' "${gateway_device_type_result}"
+pretty_print_json 'Gateway Device Type' "${gateway_device_type_result}"
 
 GATEWAY_DEVICE_TYPE_ID=$(jq --raw-output '._id' <<<"${gateway_device_type_result}")
 
@@ -199,7 +199,7 @@ gateway_device_result=$(
 }
 EOF
 )
-pretty_print_json 'Device' "${gateway_device_result}"
+pretty_print_json 'Gateway Device' "${gateway_device_result}"
 
 GATEWAY_DEVICE_ID=$(jq --raw-output '._id' <<<"${gateway_device_result}")
 
@@ -229,7 +229,7 @@ RELAY_RULE_ID=$(jq --raw-output '._id' <<<"${relay_rule_result}")
 
 RULE_IDS+=( "${RELAY_RULE_ID}" )
 
-# Associate Rule with Gateway
+# Associate Relay Rule
 # see also https://dev.edgeiq.io/reference#put_attach_rule_to_device_type
 # Note: you can also associate Rules with individual Devices
 printf "\nAssociate Relay Rule with Gateway Device Type\n"

@@ -94,7 +94,7 @@ reports_result=$(
   --header 'content-type: application/json' \
   --get \
   --data-urlencode 'page_meta=true' \
-  --data-urlencode "device_name=${GATEWAY_UNIQUE_ID}-modbus-1"
+  --data-urlencode "device_name=${GATEWAY_UNIQUE_ID}"
 )
 # Uncomment to see everything
 # pretty_print_json 'Reports' "${query_device_result}"
