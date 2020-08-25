@@ -39,12 +39,12 @@ There is a helper script [`query_entities.sh`](simple_gateway/query_entities.sh)
 
 ### Gateway with ModBus Sensor Device
 
-This example shows how EdgeIQ can be configured to manage an edge gateway device with a connected Modbus sensor. The sensor data will be forwarded to an HTTP listener. The [`httpprint.py`](httpprint.py) is an example of such a listener that will print out all HTTP messages that it receives.
+This example shows how EdgeIQ can be configured to manage an edge gateway device with a connected Modbus sensor. The sensor data will be forwarded to an HTTP listener. The [`httpprint.py`](gateway_with_modbus_sensor/instance_files/httpprint.py) is an example of such a listener that will print out all HTTP messages that it receives.
 
 Notes:
 
 * These scripts were tested against the free [diagslave](https://www.modbusdriver.com/diagslave.html) Modbus simulator, e.g. `diagslave -m tcp`.
-* To use the included [`httpprint.py`](httpprint.py), you need to have a recent version of Python 3 installed. e.g. `python3 httpprint.py`
+* To use the included [`httpprint.py`](gateway_with_modbus_sensor/instance_files/httpprint.py), you need to have a recent version of Python 3 installed. e.g. `python3 httpprint.py`
 * To see the `httpprint.py` output, run on the gateway device, e.g. Raspberry Pi, the following command `journalctl -f -all -u httpprint`.
 
 In `gateway_with_modbus_sensor` subdirectory, run the following commands.
@@ -56,19 +56,19 @@ The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timesta
 
 There are some helper scripts:
 
-* [`query_entities.sh`](query_entities.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `demo` tag. More details on Query parameters [here](https://documentation.machineshop.io/guides/api_overview)
-* [`diagslave_install.sh`](diagslave_install.sh) is an example of how to install diagslave Modbus simulator as a systemd service. Must be run as root, e.g., `sudo ./diagslave_install.sh`. You can then use `journalctl -f --all -u diagslave` to follow logs. Note the `--all` options overcomes the `[xxB blob data]` by converting the binary output from diagslave.
+* [`query_entities.sh`](gateway_with_modbus_sensor/query_entities.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `demo` tag. More details on Query parameters [here](https://documentation.machineshop.io/guides/api_overview)
+* [`diagslave_install.sh`](gateway_with_modbus_sensor/instance_files/diagslave_install.sh) is an example of how to install diagslave Modbus simulator as a systemd service. Must be run as root, e.g., `sudo ./diagslave_install.sh`. You can then use `journalctl -f --all -u diagslave` to follow logs. Note the `--all` options overcomes the `[xxB blob data]` by converting the binary output from diagslave.
 
 The Modbus sensor/simulator and the HTTP Listener should be running **BEFORE** running these scripts.
 
 ### Gateway with Attached ModBus Sensor Device
 
-This example shows how EdgeIQ can be configured to manage an edge gateway device with a connected Modbus sensor. The ModBus sensor is modeled as an attached device to the Gateway device. Otherwise this example is identical to Gateway with ModBus Sensor example. The sensor data will be forwarded to an HTTP listener. The [`httpprint.py`](httpprint.py) is an example of such a listener that will print out all HTTP messages that it receives.
+This example shows how EdgeIQ can be configured to manage an edge gateway device with a connected Modbus sensor. The ModBus sensor is modeled as an attached device to the Gateway device. Otherwise this example is identical to Gateway with ModBus Sensor example. The sensor data will be forwarded to an HTTP listener. The [`httpprint.py`](gateway_with_attached_sensor/instance_files/httpprint.py) is an example of such a listener that will print out all HTTP messages that it receives.
 
 Notes:
 
 * These scripts were tested against the free [diagslave](https://www.modbusdriver.com/diagslave.html) Modbus simulator, e.g. `diagslave -m tcp`.
-* To use the included [`httpprint.py`](httpprint.py), you need to have a recent version of Python 3 installed. e.g. `python3 httpprint.py`
+* To use the included [`httpprint.py`](gateway_with_attached_sensor/instance_files/httpprint.py), you need to have a recent version of Python 3 installed. e.g. `python3 httpprint.py`
 * To see the `httpprint.py` output, run on the gateway device, e.g. Raspberry Pi, the following command `journalctl -f -all -u httpprint`.
 
 In `gateway_with_attached_sensor` subdirectory, run the following commands.
@@ -80,7 +80,7 @@ The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timesta
 
 There are some helper scripts:
 
-* [`query_entities.sh`](query_entities.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `demo` tag. More details on Query parameters [here](https://documentation.machineshop.io/guides/api_overview)
-* [`diagslave_install.sh`](diagslave_install.sh) is an example of how to install diagslave Modbus simulator as a systemd service. Must be run as root, e.g., `sudo ./diagslave_install.sh`. You can then use `journalctl -f --all -u diagslave` to follow logs. Note the `--all` options overcomes the `[xxB blob data]` by converting the binary output from diagslave.
+* [`query_entities.sh`](gateway_with_attached_sensor/query_entities.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `demo` tag. More details on Query parameters [here](https://documentation.machineshop.io/guides/api_overview)
+* [`diagslave_install.sh`](gateway_with_attached_sensor/diagslave_install.sh) is an example of how to install diagslave Modbus simulator as a systemd service. Must be run as root, e.g., `sudo ./diagslave_install.sh`. You can then use `journalctl -f --all -u diagslave` to follow logs. Note the `--all` options overcomes the `[xxB blob data]` by converting the binary output from diagslave.
 
 The Modbus sensor/simulator and the HTTP Listener should be running **BEFORE** running these scripts.
