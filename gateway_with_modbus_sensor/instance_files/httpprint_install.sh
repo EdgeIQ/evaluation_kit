@@ -2,7 +2,10 @@
 
 set -eu
 
-SERVICE_HOME='/home/ubuntu'
+# Get directory this script is located in to access script local files
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+
+SERVICE_HOME=${SCRIPT_DIR}
 
 PYTHON3=$(which python3)
 

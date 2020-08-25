@@ -9,6 +9,8 @@ export BASE_URL='https://api.edgeiq.io/api/v1/platform'
 export ADMIN_EMAIL=${ADMIN_EMAIL:-'<your EdgeIQ username>'}
 export ADMIN_PASSWORD=${ADMIN_PASSWORD:-'<your EdgeIQ password>'}
 
+export GATEWAY_USERNAME=${GATEWAY_USERNAME:-'<username for Gateway>'}
+
 # EdgeIQ local service uses MAC address of first ethernet interface reported by `ifconfig`
 export GATEWAY_UNIQUE_ID=${GATEWAY_UNIQUE_ID:-'<Unique id for Gateway>'}
 
