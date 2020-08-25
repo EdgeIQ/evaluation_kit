@@ -1,7 +1,8 @@
 # EdgeIQ Evaluation Kit
 
-## Requirements to run these scripts
+## Requirements to run these scripts (on Linux or macOS with IP access to gateway device)
 
+* `bash` - version 4.x
 * `curl` - tested against curl version 7.64.1
 * `jq` - tested against version 1.6. Installation and documentation at <https://stedolan.github.io/jq>
 
@@ -9,17 +10,15 @@
 
 Update the [`setenv.sh`](setenv.sh) file with your
 
-* EdgeIQ username and passwordß
+* EdgeIQ username and password
 * Your gateway device MAC address and associated IP address
 * Configure EdgeIQ Device Type - defaults to Raspberry Pi 3/4 running recent Debian/Ubuntu linux
 
 ## Examples
 
-EdgeIQ Portal: <https://app.edgeiq.io>
-
-EdgeIQ API Base URL: <https://api.edgeiq.io/api/v1/platform>
-
-EdgeIQ Documentation: <https://dev.edgeiq.io/>
+* EdgeIQ Portal: <https://app.edgeiq.io>
+* EdgeIQ API Base URL: <https://api.edgeiq.io/api/v1/platform>
+* EdgeIQ Documentation: <https://dev.edgeiq.io/>
 
 The EdgeIQ local service is installed as a `systemd` managed service called `edge.service` so for example you can stop it using this command, `sudo systemctl stop edge`. The EdgeIQ local service is installed into `/opt/edge` and log files are located in a day time stamped file, e.g. `/opt/edge/log/edge.log.2020-05-18`.
 
@@ -54,7 +53,6 @@ In `gateway_with_modbus_sensor` subdirectory, run the following commands.
 2. Run [`gateway_provision.sh`](simple_gateway/gateway_provision.sh). This will install the EdgeIQ SmartEdge software onto the gateway and associate it with the EdgeIQ Device configured in the previous step.
 
 The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timestamp>.sh` file that contains API commands to delete EdgeIQ artifacts created by the create script. The cleanup scripts will delete themselves upon successful completion.
-
 
 There are some helper scripts:
 
