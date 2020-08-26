@@ -207,7 +207,7 @@ curl --silent --request POST \
   "manufacturer": "${GATEWAY_MANUFACTURER}",
   "model": "${GATEWAY_MODEL}",
   "type": "gateway",
-  "ingestor_ids": [ "${MODBUS_INGESTOR_ID}" ],
+  "ingestor_ids": [],
   "capabilities": {
     "network_connections": [
       { "type": "ethernet-wan", "name": "eth0" }
