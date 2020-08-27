@@ -35,23 +35,19 @@ sleep 2
 
 ssh-keyscan -H "${GATEWAY_IP}" >> ~/.ssh/known_hosts
 
-
 ssh-copy-id -f "${GATEWAY_USERNAME}@${GATEWAY_IP}"
 
 # Update instance with Python 3 support to httpprint listener
 ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" \
-
   "sudo sh -c 'apt-get update && apt-get upgrade --yes && apt-get install --yes python3 python3-pip'"
+
+# Update instance with snmp support
+ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" \
+  "sudo sh -c 'apt-get install --yes snmpd snmp && service snmpd restart'"
 
 # copy files to device Instance
 scp -r "${SCRIPT_DIR}/instance_files/"* \
-
   "${GATEWAY_USERNAME}@${GATEWAY_IP}:/home/${GATEWAY_USERNAME}"
-
-# install ModBus Server simulator
-# shellcheck disable=SC2029
-ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" \
-  "sudo /bin/bash /home/${GATEWAY_USERNAME}/diagslave_install.sh"
 
 # Install EdgeIQ SmartEdge
 EDGEIQ_INSTALL=$(cat <<EOF
@@ -69,11 +65,9 @@ EOF
 # printf "\nEIQ_INSTALL = %s\n" "${EDGEIQ_INSTALL}"
 
 # shellcheck disable=SC2087
-
 ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" <<<"${EDGEIQ_INSTALL}"
 
 # install httpprint command
 # shellcheck disable=SC2029
 ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" \
   "sudo -H /bin/bash /home/${GATEWAY_USERNAME}/httpprint_install.sh"
-

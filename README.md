@@ -1,7 +1,8 @@
 # EdgeIQ Evaluation Kit
 
-## Requirements to run these scripts
+## Requirements to run these scripts (on Linux or macOS with IP access to gateway device)
 
+* `bash` - version 4.x
 * `curl` - tested against curl version 7.64.1
 * `jq` - tested against version 1.6. Installation and documentation at <https://stedolan.github.io/jq>
 
@@ -15,11 +16,9 @@ Update the [`setenv.sh`](setenv.sh) file with your
 
 ## Examples
 
-EdgeIQ Portal: <https://app.edgeiq.io>
-
-EdgeIQ API Base URL: <https://api.edgeiq.io/api/v1/platform>
-
-EdgeIQ Documentation: <https://dev.edgeiq.io/>
+* EdgeIQ Portal: <https://app.edgeiq.io>
+* EdgeIQ API Base URL: <https://api.edgeiq.io/api/v1/platform>
+* EdgeIQ Documentation: <https://dev.edgeiq.io/>
 
 The EdgeIQ local service is installed as a `systemd` managed service called `edge.service` so for example you can stop it using this command, `sudo systemctl stop edge`. The EdgeIQ local service is installed into `/opt/edge` and log files are located in a day time stamped file, e.g. `/opt/edge/log/edge.log.2020-05-18`.
 
@@ -40,27 +39,70 @@ There is a helper script [`query_entities.sh`](simple_gateway/query_entities.sh)
 
 ### Gateway with ModBus Sensor Device
 
-This example shows how EdgeIQ can be configured to manage an edge gateway device with a connected Modbus sensor. The sensor data will be forwarded to an HTTP listener. The [`httpprint.py`](httpprint.py) is an example of such a listener that will print out all HTTP messages that it receives.
+This example shows how EdgeIQ can be configured to manage an edge gateway device with a connected Modbus sensor. The sensor data will be forwarded to an HTTP listener. The [`httpprint.py`](gateway_with_modbus_sensor/instance_files/httpprint.py) is an example of such a listener that will print out all HTTP messages that it receives.
 
 Notes:
 
 * These scripts were tested against the free [diagslave](https://www.modbusdriver.com/diagslave.html) Modbus simulator, e.g. `diagslave -m tcp`.
-* To use the included [`httpprint.py`](httpprint.py), you need to have a recent version of Python 3 installed. e.g. `python3 httpprint.py`
+* To use the included [`httpprint.py`](gateway_with_modbus_sensor/instance_files/httpprint.py), you need to have a recent version of Python 3 installed. e.g. `python3 httpprint.py`
 * To see the `httpprint.py` output, run on the gateway device, e.g. Raspberry Pi, the following command `journalctl -f -all -u httpprint`.
 
 In `gateway_with_modbus_sensor` subdirectory, run the following commands.
 
-1. Run [`create_edgeiq_configuration.sh`](simple_gateway/create_edgeiq_configuration.sh). This will configure an EdgeIQ Device that can be used to remotely manage your gateway
-2. Run [`gateway_provision.sh`](simple_gateway/gateway_provision.sh). This will install the EdgeIQ SmartEdge software onto the gateway and associate it with the EdgeIQ Device configured in the previous step.
+1. Run [`create_edgeiq_configuration.sh`](gateway_with_modbus_sensor/create_edgeiq_configuration.sh). This will configure an EdgeIQ Device that can be used to remotely manage your gateway
+2. Run [`gateway_provision.sh`](gateway_with_modbus_sensor/gateway_provision.sh). This will install the EdgeIQ SmartEdge software onto the gateway and associate it with the EdgeIQ Device configured in the previous step.
 
 The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timestamp>.sh` file that contains API commands to delete EdgeIQ artifacts created by the create script. The cleanup scripts will delete themselves upon successful completion.
 
+There are some helper scripts:
+
+* [`query_entities.sh`](gateway_with_modbus_sensor/query_entities.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `demo` tag. More details on Query parameters [here](https://dev.edgeiq.io/docs/api-overrview#query-string-operators)
+* [`diagslave_install.sh`](gateway_with_modbus_sensor/instance_files/diagslave_install.sh) is an example of how to install diagslave Modbus simulator as a systemd service. Must be run as root, e.g., `sudo ./diagslave_install.sh`. You can then use `journalctl -f --all -u diagslave` to follow logs. Note the `--all` options overcomes the `[xxB blob data]` by converting the binary output from diagslave.
+
+The Modbus sensor/simulator and the HTTP Listener should be running **BEFORE** running these scripts.
+
+### Gateway with Attached ModBus Sensor Device
+
+This example shows how EdgeIQ can be configured to manage an edge gateway device with a connected Modbus sensor. The ModBus sensor is modeled as an attached device to the Gateway device. Otherwise this example is identical to Gateway with ModBus Sensor example. The sensor data will be forwarded to an HTTP listener. The [`httpprint.py`](gateway_with_attached_sensor/instance_files/httpprint.py) is an example of such a listener that will print out all HTTP messages that it receives.
+
+Notes:
+
+* These scripts were tested against the free [diagslave](https://www.modbusdriver.com/diagslave.html) Modbus simulator, e.g. `diagslave -m tcp`.
+* To use the included [`httpprint.py`](gateway_with_attached_sensor/instance_files/httpprint.py), you need to have a recent version of Python 3 installed. e.g. `python3 httpprint.py`
+* To see the `httpprint.py` output, run on the gateway device, e.g. Raspberry Pi, the following command `journalctl -f -all -u httpprint`.
+
+In `gateway_with_attached_sensor` subdirectory, run the following commands.
+
+1. Run [`create_edgeiq_configuration.sh`](gateway_with_attached_sensor/create_edgeiq_configuration.sh). This will configure an EdgeIQ Device that can be used to remotely manage your gateway
+2. Run [`gateway_provision.sh`](gateway_with_attached_sensor/gateway_provision.sh). This will install the EdgeIQ SmartEdge software onto the gateway and associate it with the EdgeIQ Device configured in the previous step.
+
+The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timestamp>.sh` file that contains API commands to delete EdgeIQ artifacts created by the create script. The cleanup scripts will delete themselves upon successful completion.
 
 There are some helper scripts:
 
-* [`query_entities.sh`](query_entities.sh) that will display all the various EdgeIQ objects you have access to within your account.
-* [`query_devices.sh`](query_devices.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `poc` tag. More details on Query parameters [here](https://documentation.machineshop.io/guides/api_overview)
-* [`query_reports.sh`](query_reports.sh) gets the latest Sensor data
-* [`diagslave_install.sh`](diagslave_install.sh) is an example of how to install diagslave Modbus simulator as a systemd service. Must be run as root, e.g., `sudo ./diagslave_install.sh`. You can then use `journalctl -f --all -u diagslave` to follow logs. Note the `--all` options overcomes the `[xxB blob data]` by converting the binary output from diagslave.
+
+* [`query_entities.sh`](gateway_with_attached_sensor/query_entities.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `demo` tag. More details on Query parameters [here](https://dev.edgeiq.io/docs/api-overrview#query-string-operators)
+* [`diagslave_install.sh`](gateway_with_attached_sensor/diagslave_install.sh) is an example of how to install diagslave Modbus simulator as a systemd service. Must be run as root, e.g., `sudo ./diagslave_install.sh`. You can then use `journalctl -f --all -u diagslave` to follow logs. Note the `--all` options overcomes the `[xxB blob data]` by converting the binary output from diagslave.
 
 The Modbus sensor/simulator and the HTTP Listener should be running **BEFORE** running these scripts.
+
+### Gateway with Attached SNMP Sensor Device
+
+This example shows how EdgeIQ can be configured to manage an edge gateway device with a connected SNMP sensor. The SNMP sensor is modeled as an attached device to the Gateway device. The sensor data will be forwarded to an HTTP listener. The [`httpprint.py`](gateway_with_attached_sensor_snmp/instance_files/httpprint.py) is an example of such a listener that will print out all HTTP messages that it receives.
+
+Notes:
+
+* These scripts were tested against the raspberry pi raspian running a gateway local `snmpd` installed by [`gateway_provision.sh`](gateway_with_attached_sensor_snmp/gateway_provision.sh)
+* To use the included [`httpprint.py`](gateway_with_attached_sensor_snmp/instance_files/httpprint.py), you need to have a recent version of Python 3 installed. e.g. `python3 httpprint.py`
+* To see the `httpprint.py` output, run on the gateway device, e.g. Raspberry Pi, the following command `journalctl -f -all -u httpprint`.
+
+In `gateway_with_attached_sensor_snmp` subdirectory, run the following commands.
+
+1. Run [`create_edgeiq_configuration.sh`](gateway_with_attached_sensor_snmp/create_edgeiq_configuration.sh). This will configure an EdgeIQ Device that can be used to remotely manage your gateway
+2. Run [`gateway_provision.sh`](gateway_with_attached_sensor_snmp/gateway_provision.sh). This will install the EdgeIQ SmartEdge software onto the gateway and associate it with the EdgeIQ Device configured in the previous step.
+
+The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timestamp>.sh` file that contains API commands to delete EdgeIQ artifacts created by the create script. The cleanup scripts will delete themselves upon successful completion.
+
+There are some helper scripts:
+
+* [`query_entities.sh`](gateway_with_attached_sensor_snmp/query_entities.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `demo` tag. More details on Query parameters [here](https://dev.edgeiq.io/docs/api-overrview#query-string-operators)
