@@ -56,7 +56,7 @@ The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timesta
 
 There are some helper scripts:
 
-* [`query_entities.sh`](gateway_with_modbus_sensor/query_entities.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `demo` tag. More details on Query parameters [here](https://documentation.machineshop.io/guides/api_overview)
+* [`query_entities.sh`](gateway_with_modbus_sensor/query_entities.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `demo` tag. More details on Query parameters [here](https://dev.edgeiq.io/docs/api-overrview#query-string-operators)
 * [`diagslave_install.sh`](gateway_with_modbus_sensor/instance_files/diagslave_install.sh) is an example of how to install diagslave Modbus simulator as a systemd service. Must be run as root, e.g., `sudo ./diagslave_install.sh`. You can then use `journalctl -f --all -u diagslave` to follow logs. Note the `--all` options overcomes the `[xxB blob data]` by converting the binary output from diagslave.
 
 The Modbus sensor/simulator and the HTTP Listener should be running **BEFORE** running these scripts.
@@ -80,7 +80,28 @@ The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timesta
 
 There are some helper scripts:
 
-* [`query_entities.sh`](gateway_with_attached_sensor/query_entities.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `demo` tag. More details on Query parameters [here](https://documentation.machineshop.io/guides/api_overview)
+* [`query_entities.sh`](gateway_with_attached_sensor/query_entities.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `demo` tag. More details on Query parameters [here](https://dev.edgeiq.io/docs/api-overrview#query-string-operators)
 * [`diagslave_install.sh`](gateway_with_attached_sensor/diagslave_install.sh) is an example of how to install diagslave Modbus simulator as a systemd service. Must be run as root, e.g., `sudo ./diagslave_install.sh`. You can then use `journalctl -f --all -u diagslave` to follow logs. Note the `--all` options overcomes the `[xxB blob data]` by converting the binary output from diagslave.
 
 The Modbus sensor/simulator and the HTTP Listener should be running **BEFORE** running these scripts.
+
+### Gateway with Attached SNMP Sensor Device
+
+This example shows how EdgeIQ can be configured to manage an edge gateway device with a connected SNMP sensor. The SNMP sensor is modeled as an attached device to the Gateway device. The sensor data will be forwarded to an HTTP listener. The [`httpprint.py`](gateway_with_attached_sensor_snmp/instance_files/httpprint.py) is an example of such a listener that will print out all HTTP messages that it receives.
+
+Notes:
+
+* These scripts were tested against the raspberry pi raspian running a gateway local `snmpd` installed by [`gateway_provision.sh`](gateway_with_attached_sensor_snmp/gateway_provision.sh)
+* To use the included [`httpprint.py`](gateway_with_attached_sensor_snmp/instance_files/httpprint.py), you need to have a recent version of Python 3 installed. e.g. `python3 httpprint.py`
+* To see the `httpprint.py` output, run on the gateway device, e.g. Raspberry Pi, the following command `journalctl -f -all -u httpprint`.
+
+In `gateway_with_attached_sensor_snmp` subdirectory, run the following commands.
+
+1. Run [`create_edgeiq_configuration.sh`](gateway_with_attached_sensor_snmp/create_edgeiq_configuration.sh). This will configure an EdgeIQ Device that can be used to remotely manage your gateway
+2. Run [`gateway_provision.sh`](gateway_with_attached_sensor_snmp/gateway_provision.sh). This will install the EdgeIQ SmartEdge software onto the gateway and associate it with the EdgeIQ Device configured in the previous step.
+
+The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timestamp>.sh` file that contains API commands to delete EdgeIQ artifacts created by the create script. The cleanup scripts will delete themselves upon successful completion.
+
+There are some helper scripts:
+
+* [`query_entities.sh`](gateway_with_attached_sensor_snmp/query_entities.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `demo` tag. More details on Query parameters [here](https://dev.edgeiq.io/docs/api-overrview#query-string-operators)
