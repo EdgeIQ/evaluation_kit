@@ -80,6 +80,7 @@ The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timesta
 
 There are some helper scripts:
 
+
 * [`query_entities.sh`](gateway_with_attached_sensor/query_entities.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `demo` tag. More details on Query parameters [here](https://dev.edgeiq.io/docs/api-overrview#query-string-operators)
 * [`diagslave_install.sh`](gateway_with_attached_sensor/diagslave_install.sh) is an example of how to install diagslave Modbus simulator as a systemd service. Must be run as root, e.g., `sudo ./diagslave_install.sh`. You can then use `journalctl -f --all -u diagslave` to follow logs. Note the `--all` options overcomes the `[xxB blob data]` by converting the binary output from diagslave.
 
