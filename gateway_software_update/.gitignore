@@ -1,0 +1,4 @@
+*.pyc
+/configuration.py
+*.log
+/venv/
