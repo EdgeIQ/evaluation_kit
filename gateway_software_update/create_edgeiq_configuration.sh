@@ -142,9 +142,9 @@ software_update_result=$(
 }
 EOF
 )
-pretty_print_json 'Device' "${gateway_device_result}"
+pretty_print_json 'Device' "${software_update_result}"
 
-GATEWAY_DEVICE_ID=$(jq --raw-output '._id' <<<"${gateway_device_result}")
+SOFTWARE_UPDATE_ID=$(jq --raw-output '._id' <<<"${software_update_result}")
 
 # Create cleanup file
 
@@ -187,6 +187,12 @@ curl --request DELETE \
   --url "${BASE_URL}/device_types/${_GATEWAY_DEVICE_TYPE_ID}" \
   --header 'accept: application/json' \
   --header "authorization: ${_SESSION_API_KEY}"
+
+curl --request DELETE \
+    --url "${BASE_URL}/software_update/${_SOFTWARE_UPDATE_ID}" \
+    --header 'accept: application/json' \
+    --header "authorization: ${_SESSION_API_KEY}"
+
 
 rm -- "${FILE_NAME}"
 EOF
