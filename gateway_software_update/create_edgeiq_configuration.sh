@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-# This script will create a new device type, device, software_update,
-# and then execute that software update.
+# This script will create a new gateway device type, device & software_update
 # - get device ID
 # - create software update config (simple apt-get update/upgrade/reboot)
 # - execute gateway command to update software
@@ -134,11 +133,11 @@ software_update_result=$(
     --header 'content-type: multipart/form-data; boundary=---011000010111000001101001'
     --data @- <<EOF
 {
-  "name":"Demo Software Update"
+  "name": "Demo Software Update"
   "device_type_id": "${GATEWAY_DEVICE_TYPE_ID}",
-  "files":NULL,
-  "script":"apt-get update; apt-get upgrade -f -m -y",
-  "reboot":true,
+  "files": NULL,
+  "script": "apt-get update; apt-get upgrade -f -m -y;",
+  "reboot": true,
 }
 EOF
 )
