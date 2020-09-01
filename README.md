@@ -1,16 +1,44 @@
 # EdgeIQ Evaluation Kit
 
-## Requirements to run these scripts (on Linux or macOS with IP access to gateway device)
+## Requirements to run these scripts
+These scripts assume that you are working with the following test environment:
 
-* `bash` - version 4.x
+`host` - PC, Macbook, VM, etc. - used to run scripts and SSH to gateway
+`gateway` - Embedded x86 or ARM device, Raspberry Pi 3/4, AWS VM, etc.
+`sensors` - sensor devices can be a target to ping, temperature sensor, etc.
+
+```mermaid
+graph RL
+
+subgraph LAN
+	C([Gateway])  --- |modbus| J([sensor 1])
+	C([Gateway]) -.- |snmp| K([sensor 2])
+	C([Gateway]) -.- |http| L([sensor 3])
+end
+
+subgraph Internet
+	A[(EdgeIQ API)]  === C([Gateway])
+end
+
+subgraph host[Macbook]
+	E[host] -.-> |https/curl| A[(EdgeIQ API)]
+	E[host] -.- |ssh| C([Gateway])
+end
+```
+from a development host, and will be using SSH to install the edge software on your gateway device.
+
+* `bash` - version 4.x or newer
 * `curl` - tested against curl version 7.64.1
-* `jq` - tested against version 1.6. Installation and documentation at <https://stedolan.github.io/jq>
+* `jq` - tested against version 1.6. See: <https://stedolan.github.io/jq>
+
+Test environment:
 
 ## Setup
 
 Update the [`setenv.sh`](setenv.sh) file with your
 
 * EdgeIQ username and password
+* SSH username for your gateway device
 * Your gateway device MAC address and associated IP address
 * Configure EdgeIQ Device Type - defaults to Raspberry Pi 3/4 running recent Debian/Ubuntu linux
 
@@ -89,6 +117,8 @@ The Modbus sensor/simulator and the HTTP Listener should be running **BEFORE** r
 ### Gateway with Attached SNMP Sensor Device
 
 This example shows how EdgeIQ can be configured to manage an edge gateway device with a connected SNMP sensor. The SNMP sensor is modeled as an attached device to the Gateway device. The sensor data will be forwarded to an HTTP listener. The [`httpprint.py`](gateway_with_attached_sensor_snmp/instance_files/httpprint.py) is an example of such a listener that will print out all HTTP messages that it receives.
+
+
 
 Notes:
 
