@@ -325,6 +325,7 @@ curl --silent --request PUT \
   --header 'content-type: application/json'
 
 # Tell our gateway device to update it's config to see all these new changes
+# see also https://dev.edgeiq.io/reference#devices-gateway-commands-1
 printf "\nTelling the gateway to update it's configuration... Done.\n"
 curl --silent --request POST \
   --url "https://api.edgeiq.io/api/v1/platform/devices/${GATEWAY_DEVICE_ID}/send_config" \
