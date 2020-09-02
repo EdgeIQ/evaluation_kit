@@ -43,12 +43,11 @@ ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" \
 
 # copy files to device Instance
 scp -r "${SCRIPT_DIR}/instance_files/"* \
-  "${GATEWAY_USERNAME}@${GATEWAY_IP}:/home/${GATEWAY_USERNAME}"
+  "${GATEWAY_USERNAME}@${GATEWAY_IP}:./"
 
 # install ModBus Server simulator
-# shellcheck disable=SC2029
 ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" \
-  "sudo /bin/bash /home/${GATEWAY_USERNAME}/diagslave_install.sh"
+  "sudo /bin/bash ./diagslave_install.sh"
 
 # Install EdgeIQ SmartEdge
 EDGEIQ_INSTALL=$(cat <<EOF
@@ -62,13 +61,10 @@ wget --quiet --output-document='install.sh' \
   --url https://api.edgeiq.io/api/v1/platform/installers/${GATEWAY_MANUFACTURER}/${GATEWAY_MODEL}/edge-${SMARTEDGE_VERSION}.run
 EOF
 )
-
 # printf "\nEIQ_INSTALL = %s\n" "${EDGEIQ_INSTALL}"
 
-# shellcheck disable=SC2087
 ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" <<<"${EDGEIQ_INSTALL}"
 
 # install httpprint command
-# shellcheck disable=SC2029
 ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" \
-  "sudo -H /bin/bash /home/${GATEWAY_USERNAME}/httpprint_install.sh"
+  "sudo -H /bin/bash ./httpprint_install.sh"
