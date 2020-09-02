@@ -28,4 +28,4 @@ export GATEWAY_MANUFACTURER='rpf'
 export GATEWAY_MODEL='rpi'
 
 # EdgeIQ SmartEdge version
-export SMARTEDGE_VERSION='2.6.5'
+export SMARTEDGE_VERSION='2.6.6'
