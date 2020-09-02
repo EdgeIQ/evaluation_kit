@@ -30,7 +30,7 @@ validate_environment
 
 SESSION_API_KEY=$(get_session_api_key)
 
-# Create SNMP Translator
+# Create Shell Ping Translator
 # valid type: template, javascript
 # * template - use Go lang template processing with the following template variable
 #   - output - raw data coming as string from ingestor protocol processing
@@ -38,11 +38,12 @@ SESSION_API_KEY=$(get_session_api_key)
 # see also https://dev.edgeiq.io/reference#post_translators
 script_template=$(cat <<EOF
 {
-  "device_id": "{{.device_unique_id}}",
-  "payload": {
-    "type": "snmp",
-    "values": {{.output}}
-  }
+		"device_id": "${GATEWAY_UNIQUE_ID}-sensor-1",
+		"payload": {
+		  "type": "shell",
+		  "target": "8.8.8.8",
+      "latency": {{.output}}
+		}
 }
 EOF
 )
@@ -50,12 +51,12 @@ EOF
 # Using jq to JSON safe encode script_template and $(whoami) values
 json_payload=$(
   jq --null-input \
-    --arg name "Demo $(whoami)'s SNMP Translator" \
+    --arg name "Demo Shell-Ping Translator" \
     --arg script "${script_template}" \
     '{ name: $name, type: "template", cloud_translator: false, script: $script }'
 )
 
-snmp_translator_result=$(
+shellping_translator_result=$(
   curl --silent --request POST \
     --url "${BASE_URL}/translators" \
     --header 'accept: application/json' \
@@ -63,43 +64,42 @@ snmp_translator_result=$(
     --header 'content-type: application/json' \
     --data "${json_payload}"
 )
-pretty_print_json "SNMP Translator" "${snmp_translator_result}"
+pretty_print_json "Shell-Ping Translator" "${shellping_translator_result}"
 
-SNMP_TRANSLATOR_ID=$(jq --raw-output '._id' <<<"${snmp_translator_result}")
+SHELLPING_TRANSLATOR_ID=$(jq --raw-output '._id' <<<"${shellping_translator_result}")
 
-TRANSLATOR_IDS+=( "${SNMP_TRANSLATOR_ID}" )
+TRANSLATOR_IDS+=( "${SHELLPING_TRANSLATOR_ID}" )
 
-# Create SNMP Ingestor
+# Create Shell-Ping Ingestor
 # see also https://dev.edgeiq.io/reference#post_ingestors
-snmp_ingestor_result=$(
+
+script_template2=$(cat <<EOF
+/bin/ping -c1 \${host:-8.8.8.8} | sed -n 's/.*time=\(.*\) .*/\1/p'
+EOF
+)
+
+# Using jq to JSON safe encode script_template and $(whoami) values
+json_payload2=$(
+  jq --null-input \
+     --arg name "${GATEWAY_UNIQUE_ID}-sensor-1 Ingestor" \
+     --arg translator_id "${SHELLPING_TRANSLATOR_ID}" \
+     --arg command "${script_template2}" \
+    '{   "name": $name, "type": "edge", "listener_type": "shell_polling", "listener": { "command": $command, "poll_interval": 5, "timeout": 1 }, "handler_type": "passthrough","translator_id": $translator_id }'
+)
+
+shellping_ingestor_result=$(
   curl --silent --request POST \
     --url "${BASE_URL}/ingestors" \
     --header 'accept: application/json' \
     --header "authorization: ${SESSION_API_KEY}" \
     --header 'content-type: application/json' \
-    --data @- <<EOF
-{
-  "name": "Demo $(whoami)'s SNMP Ingestor",
-  "cloud_translator": false,
-  "listener_type": "snmp_polling",
-    "listener": {
-      "target_host_map": {
-        "${GATEWAY_UNIQUE_ID}-sensor-1": "127.0.0.1"
-      },
-      "oids": [ ".1.3.6.1.2.1.1.1.0" ],
-      "poll_interval": 5,
-      "timeout": 5
-    },
-    "handler_type": "passthrough",
-    "translator_id": "${SNMP_TRANSLATOR_ID}"
-}
-EOF
+    --data "${json_payload2}"
 )
-pretty_print_json "Modbus Ingestor" "${snmp_ingestor_result}"
+pretty_print_json "Shell-Ping Ingestor" "${shellping_ingestor_result}"
 
-SNMP_INGESTOR_ID=$(jq --raw-output '._id' <<<"${snmp_ingestor_result}")
+SHELLPING_INGESTOR_ID=$(jq --raw-output '._id' <<<"${shellping_ingestor_result}")
 
-INGESTOR_IDS+=( "${SNMP_INGESTOR_ID}" )
+INGESTOR_IDS+=( "${SHELLPING_INGESTOR_ID}" )
 
 # Create Sensor Device Type
 # see also https://dev.edgeiq.io/reference#post_device_types
@@ -111,12 +111,12 @@ curl --silent --request POST \
   --header 'content-type: application/json' \
   --data @- <<EOF
 {
-  "name": "Demo $(whoami)'s Sensor Device Type",
+  "name": "Demo Sensor Device Type",
   "long_description": "",
   "manufacturer": "generic",
   "model": "sensor",
   "type": "sensor",
-  "ingestor_ids": [ "${SNMP_INGESTOR_ID}" ],
+  "ingestor_ids": [ "${SHELLPING_INGESTOR_ID}" ],
   "capabilities": {
     "actions": {
       "notification": true,
@@ -163,12 +163,12 @@ sensor_device_result=$(
     --header 'content-type: application/json' \
     --data @- <<EOF
 {
-  "name": "Demo $(whoami)'s Sensor",
+  "name": "Demo Ping Sensor",
   "device_type_id": "${SENSOR_DEVICE_TYPE_ID}",
   "unique_id": "${GATEWAY_UNIQUE_ID}-sensor-1",
   "heartbeat_period": 120,
   "heartbeat_values": [],
-  "ingestor_ids": [],
+  "ingestor_ids": [ "${SHELLPING_INGESTOR_ID}" ],
   "attached_device_ids": [],
   "tags": [ "demo" ],
   "log_config": {
@@ -179,11 +179,12 @@ sensor_device_result=$(
 }
 EOF
 )
-pretty_print_json 'Device' "${sensor_device_result}"
+pretty_print_json 'Sensor Device' "${sensor_device_result}"
 
 SENSOR_DEVICE_ID=$(jq --raw-output '._id' <<<"${sensor_device_result}")
 
 DEVICE_IDS+=( "${SENSOR_DEVICE_ID}" )
+
 
 # Create Gateway Device Type
 # see also https://dev.edgeiq.io/reference#post_device_types
@@ -195,7 +196,7 @@ curl --silent --request POST \
   --header 'content-type: application/json' \
   --data @- <<EOF
 {
-  "name": "Demo $(whoami)'s Gateway Device Type",
+  "name": "Demo Gateway Device Type",
   "long_description": "",
   "manufacturer": "${GATEWAY_MANUFACTURER}",
   "model": "${GATEWAY_MODEL}",
@@ -260,11 +261,11 @@ gateway_device_result=$(
     --header 'content-type: application/json' \
     --data @- <<EOF
 {
-  "name": "Demo $(whoami)'s Gateway",
+  "name": "Demo Gateway",
   "device_type_id": "${GATEWAY_DEVICE_TYPE_ID}",
   "unique_id": "${GATEWAY_UNIQUE_ID}",
-  "heartbeat_period": 120,
-  "heartbeat_values": [ "cpu_usage" ],
+  "heartbeat_period": 60,
+  "heartbeat_values": [ "cpu_usage", "disk_usage", "ram_usage" ],
   "ingestor_ids": [],
   "attached_device_ids": [ "${SENSOR_DEVICE_ID}" ],
   "tags": [ "demo" ],
@@ -292,7 +293,7 @@ relay_rule_result=$(
     --header 'content-type: application/json' \
     --data @- <<EOF
 {
-  "description": "Demo $(whoami)'s Relay All to the Cloud",
+  "description": "Demo Relay All to the Cloud",
   "active": true,
   "cloud_rule": false,
   "then_actions": [ { "type": "relay" } ],
@@ -323,53 +324,6 @@ curl --silent --request PUT \
   --header "authorization: ${SESSION_API_KEY}" \
   --header 'content-type: application/json'
 
-# Create HTTP forward rule
-# see also https://dev.edgeiq.io/reference#post_rules
-http_rule_result=$(
-  curl --silent --request POST \
-    --url "${BASE_URL}/rules" \
-    --header 'accept: application/json' \
-    --header "authorization: ${SESSION_API_KEY}" \
-    --header 'content-type: application/json' \
-    --data @- <<EOF
-{
-  "description": "Demo $(whoami)'s HTTP forward",
-  "active": true,
-  "cloud_rule": false,
-  "then_actions": [
-    {
-      "type": "http_request",
-      "send_to": "http://localhost:5005/",
-      "body_template": "coil_status for {{.device.name}} is {{.report.payload.coil_status}}",
-      "method": "put",
-      "headers": { "Content-Type": "text/plain" }
-    }
-  ],
-  "rule_condition": {
-    "type": "equal",
-    "property": "type",
-    "value": "modbus sensor"
-  }
-}
-EOF
-)
-pretty_print_json 'HTTP Rule' "${http_rule_result}"
-
-HTTP_RULE_ID=$(jq --raw-output '._id' <<<"${http_rule_result}")
-
-RULE_IDS+=( "${HTTP_RULE_ID}" )
-
-# Associate HTTP Forward Rule with Sensor Device Type
-# see also https://dev.edgeiq.io/reference#put_attach_rule_to_device_type
-# Note: you can also associate Rules with individual Devices
-printf "\nAssociate HTTP Rule with Sensor Device Type\n"
-curl --silent --request PUT \
-  --url "${BASE_URL}/device_types/${SENSOR_DEVICE_TYPE_ID}/rules/${HTTP_RULE_ID}" \
-  --header 'accept: application/json' \
-  --header "authorization: ${SESSION_API_KEY}" \
-  --header 'content-type: application/json'
-
-
 # Tell our gateway device to update it's config to see all these new changes
 # see also https://dev.edgeiq.io/reference#devices-gateway-commands-1
 printf "\nTelling the gateway to update it's configuration... Done.\n"
@@ -379,8 +333,8 @@ curl --silent --request POST \
   --header "authorization: ${SESSION_API_KEY}" \
   --header 'content-type: application/json'
 
-
 # Create cleanup file
+
 # Create cleanup script with unique name generated using num seconds since Jan 1 1970
 FILE_NAME="cleanup-demo-$(date '+%s').sh"
 
@@ -413,35 +367,35 @@ trap "exit 1" TERM
 export TOP_PID=$$
 
 _SESSION_API_KEY=$(get_session_api_key)
-
+echo "Cleaning: Devices"
 for id in "${_DEVICE_IDS[@]}"; do
   curl --request DELETE \
     --url "${BASE_URL}/devices/${id}" \
     --header 'accept: application/json' \
     --header "authorization: ${_SESSION_API_KEY}"
 done
-
+echo "Cleaning: Device Types"
 for id in "${_DEVICE_TYPE_IDS[@]}"; do
   curl --request DELETE \
     --url "${BASE_URL}/device_types/${id}" \
     --header 'accept: application/json' \
     --header "authorization: ${_SESSION_API_KEY}"
 done
-
+echo "Cleaning: Ingestors"
 for id in "${_INGESTOR_IDS[@]}"; do
   curl --request DELETE \
     --url "${BASE_URL}/ingestors/${id}" \
     --header 'accept: application/json' \
     --header "authorization: ${_SESSION_API_KEY}"
 done
-
+echo "Cleaning: Translators"
 for id in "${_TRANSLATOR_IDS[@]}"; do
   curl --request DELETE \
     --url "${BASE_URL}/translators/${id}" \
     --header 'accept: application/json' \
     --header "authorization: ${_SESSION_API_KEY}"
 done
-
+echo "Cleaning: Rules"
 for id in "${_RULE_IDS[@]}"; do
   curl --request DELETE \
     --url "${BASE_URL}/rules/${id}" \
