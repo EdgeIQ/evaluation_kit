@@ -37,17 +37,9 @@ ssh-keyscan -H "${GATEWAY_IP}" >> ~/.ssh/known_hosts
 
 ssh-copy-id -f "${GATEWAY_USERNAME}@${GATEWAY_IP}"
 
-# Update instance with Python 3 support to httpprint listener
-ssh -t "${GATEWAY_USERNAME}@${GATEWAY_IP}" \
-  "sudo sh -c 'apt-get update && apt-get upgrade --yes && apt-get install --yes python3 python3-pip'"
-
-# Update instance with snmp support
-ssh -t "${GATEWAY_USERNAME}@${GATEWAY_IP}" \
-  "sudo sh -c 'apt-get install --yes snmpd snmp && service snmpd restart'"
-
-# copy files to device Instance
-scp -r "${SCRIPT_DIR}/instance_files/"* \
-  "${GATEWAY_USERNAME}@${GATEWAY_IP}:./"
+# Update instance
+# ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" \
+#   "sudo sh -c 'apt-get update && apt-get upgrade --yes'"
 
 # Install EdgeIQ SmartEdge
 EDGEIQ_INSTALL=$(cat <<EOF
@@ -61,10 +53,6 @@ wget --quiet --output-document='install.sh' \
   --url https://api.edgeiq.io/api/v1/platform/installers/${GATEWAY_MANUFACTURER}/${GATEWAY_MODEL}/edge-${SMARTEDGE_VERSION}.run
 EOF
 )
-printf "\nEIQ_INSTALL = %s\n" "${EDGEIQ_INSTALL}"
+# printf "\nEIQ_INSTALL = %s\n" "${EDGEIQ_INSTALL}"
 
 ssh -t "${GATEWAY_USERNAME}@${GATEWAY_IP}" <<<"${EDGEIQ_INSTALL}"
-
-# install httpprint command
-ssh -t "${GATEWAY_USERNAME}@${GATEWAY_IP}" \
-  "sudo -H /bin/bash ./httpprint_install.sh"

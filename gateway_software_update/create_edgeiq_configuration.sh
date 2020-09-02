@@ -119,7 +119,6 @@ pretty_print_json 'Device' "${gateway_device_result}"
 
 GATEWAY_DEVICE_ID=$(jq --raw-output '._id' <<<"${gateway_device_result}")
 
-
 # Create Software Update
 # files: array of name/link combo for files to be downloaded to gateway and executed
 # script: [command] | command or filename or script. i.e. "./install.sh"
@@ -130,7 +129,7 @@ software_update_result=$(
     --url "${BASE_URL}/software_updates" \
     --header 'accept: application/json' \
     --header "authorization: ${SESSION_API_KEY}" \
-    --header 'content-type: multipart/form-data; boundary=---011000010111000001101001'
+    --header 'content-type: multipart/form-data; boundary=---011000010111000001101001' \
     --data @- <<EOF
 {
   "name": "Demo Software Update"
@@ -145,6 +144,18 @@ pretty_print_json 'Device' "${software_update_result}"
 
 SOFTWARE_UPDATE_ID=$(jq --raw-output '._id' <<<"${software_update_result}")
 
+# Tell our gateway device to update it's config to see all these new changes
+# see also https://dev.edgeiq.io/reference#devices-gateway-commands-1
+printf "\nTelling the gateway to update it's configuration... Done.\n"
+send_config_result=$(
+  curl --silent --request POST \
+    --url "${BASE_URL}/devices/${GATEWAY_DEVICE_ID}/send_config" \
+    --header 'accept: application/json' \
+    --header "authorization: ${SESSION_API_KEY}" \
+    --header 'content-type: application/json'
+)
+pretty_print_json 'Send Config' "${send_config_result}"
+
 # Create cleanup file
 
 # Create cleanup script with unique name generated using num seconds since Jan 1 1970
@@ -156,6 +167,7 @@ cat <<EOF >"${FILE_NAME}"
 
 _GATEWAY_DEVICE_ID="${GATEWAY_DEVICE_ID}"
 _GATEWAY_DEVICE_TYPE_ID="${GATEWAY_DEVICE_TYPE_ID}"
+_SOFTWARE_UPDATE_ID="${SOFTWARE_UPDATE_ID}"
 
 FILE_NAME="${FILE_NAME}"
 EOF
@@ -191,7 +203,6 @@ curl --request DELETE \
     --url "${BASE_URL}/software_update/${_SOFTWARE_UPDATE_ID}" \
     --header 'accept: application/json' \
     --header "authorization: ${_SESSION_API_KEY}"
-
 
 rm -- "${FILE_NAME}"
 EOF
