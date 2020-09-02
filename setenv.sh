@@ -21,11 +21,13 @@ export GATEWAY_IP=${GATEWAY_IP:-'<Gateway device IP>'}
 # * Raspberry PI - 'rpf'
 # * x86_64 - 'generic'
 export GATEWAY_MANUFACTURER='rpf'
+# export GATEWAY_MANUFACTURER='generic'
 
 # Gateway's EdgeIQ device type
 # * Raspberry PI linux - 'rpi'
 # * x86_64 Linux - 'linux'
 export GATEWAY_MODEL='rpi'
+# export GATEWAY_MODEL='linux'
 
 # EdgeIQ SmartEdge version
 export SMARTEDGE_VERSION='2.6.6'
