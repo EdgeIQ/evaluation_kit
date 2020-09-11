@@ -35,11 +35,8 @@ sleep 2
 
 ssh-keyscan -H "${GATEWAY_IP}" >> ~/.ssh/known_hosts
 
-ssh-copy-id -f "ubuntu@${GATEWAY_IP}"
+ssh-copy-id -f "${GATEWAY_USERNAME}@${GATEWAY_IP}"
 
-# Update instance
-# ssh "ubuntu@${GATEWAY_IP}" \
-#   "sudo sh -c 'apt-get update && apt-get upgrade --yes'"
 
 # Install EdgeIQ SmartEdge
 EDGEIQ_INSTALL=$(cat <<EOF
@@ -57,4 +54,4 @@ EOF
 # printf "\nEIQ_INSTALL = %s\n" "${EDGEIQ_INSTALL}"
 
 # shellcheck disable=SC2087
-ssh "ubuntu@${GATEWAY_IP}" <<<"${EDGEIQ_INSTALL}"
+ssh "${GATEWAY_USERNAME}" <<<"${EDGEIQ_INSTALL}"
