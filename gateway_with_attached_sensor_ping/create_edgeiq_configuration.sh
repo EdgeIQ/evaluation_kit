@@ -40,8 +40,8 @@ script_template=$(cat <<EOF
 {
 		"device_id": "${GATEWAY_UNIQUE_ID}-sensor-1",
 		"payload": {
-		  "type": "shell",
-		  "target": "8.8.8.8",
+      "type": "shell",
+      "target": "8.8.8.8",
       "latency": {{.output}}
 		}
 }
@@ -73,18 +73,15 @@ TRANSLATOR_IDS+=( "${SHELLPING_TRANSLATOR_ID}" )
 # Create Shell-Ping Ingestor
 # see also https://dev.edgeiq.io/reference#post_ingestors
 
-script_template2=$(cat <<EOF
-/bin/ping -c1 \${host:-8.8.8.8} | sed -n 's/.*time=\(.*\) .*/\1/p'
-EOF
-)
+script_template2="/bin/ping -c1 \${host:-8.8.8.8} | sed -n 's/.*time=\(.*\) .*/\1/p'"
 
 # Using jq to JSON safe encode script_template and $(whoami) values
 json_payload2=$(
   jq --null-input \
-     --arg name "${GATEWAY_UNIQUE_ID}-sensor-1 Ingestor" \
-     --arg translator_id "${SHELLPING_TRANSLATOR_ID}" \
-     --arg command "${script_template2}" \
-    '{   "name": $name, "type": "edge", "listener_type": "shell_polling", "listener": { "command": $command, "poll_interval": 5, "timeout": 1 }, "handler_type": "passthrough","translator_id": $translator_id }'
+    --arg name "${GATEWAY_UNIQUE_ID}-sensor-1 Ingestor" \
+    --arg translator_id "${SHELLPING_TRANSLATOR_ID}" \
+    --arg command "${script_template2}" \
+    '{ "name": $name, "type": "edge", "listener_type": "shell_polling", "listener": { "command": $command, "poll_interval": 5, "timeout": 1 }, "handler_type": "passthrough", "translator_id": $translator_id }'
 )
 
 shellping_ingestor_result=$(
@@ -184,7 +181,6 @@ pretty_print_json 'Sensor Device' "${sensor_device_result}"
 SENSOR_DEVICE_ID=$(jq --raw-output '._id' <<<"${sensor_device_result}")
 
 DEVICE_IDS+=( "${SENSOR_DEVICE_ID}" )
-
 
 # Create Gateway Device Type
 # see also https://dev.edgeiq.io/reference#post_device_types
@@ -327,11 +323,14 @@ curl --silent --request PUT \
 # Tell our gateway device to update it's config to see all these new changes
 # see also https://dev.edgeiq.io/reference#devices-gateway-commands-1
 printf "\nTelling the gateway to update it's configuration... Done.\n"
-curl --silent --request POST \
-  --url "https://api.edgeiq.io/api/v1/platform/devices/${GATEWAY_DEVICE_ID}/send_config" \
-  --header 'accept: application/json' \
-  --header "authorization: ${SESSION_API_KEY}" \
-  --header 'content-type: application/json'
+send_config_result=$(
+  curl --silent --request POST \
+    --url "${BASE_URL}/devices/${GATEWAY_DEVICE_ID}/send_config" \
+    --header 'accept: application/json' \
+    --header "authorization: ${SESSION_API_KEY}" \
+    --header 'content-type: application/json'
+)
+pretty_print_json 'Send Config' "${send_config_result}"
 
 # Create cleanup file
 

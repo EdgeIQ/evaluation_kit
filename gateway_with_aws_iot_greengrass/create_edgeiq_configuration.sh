@@ -23,6 +23,27 @@ validate_environment
 
 SESSION_API_KEY=$(get_session_api_key)
 
+aws_integration_result=$(
+  curl --silent --request POST \
+    --url "${BASE_URL}/integrations" \
+    --header 'accept: application/json' \
+    --header "authorization: ${SESSION_API_KEY}" \
+    --header 'content-type: application/json' \
+    --data @- <<EOF
+{
+  "name": "Demo $(whoami)'s AWS IoT Greengrass Integration",
+  "type": "aws_device_integrations",
+  "region": "${AWS_IOT_REGION}",
+  "external_id": "${AWS_IOT_EXTERNAL_ID}",
+  "role_arn": "${AWS_IOT_ROLE_ARN}",
+  "greengrass_core_install_url": "${AWS_IOT_GG_URL}"
+}
+EOF
+)
+pretty_print_json 'AWS Integration' "${aws_integration_result}"
+
+AWS_INTEGRATION_ID=$(jq --raw-output '._id' <<<"${aws_integration_result}")
+
 # Create Gateway Device Type
 # see also https://dev.edgeiq.io/reference#post_device_types
 gateway_device_type_result=$(
@@ -101,6 +122,7 @@ gateway_device_result=$(
   "heartbeat_period": 120,
   "heartbeat_values": [ "cpu_usage" ],
   "ingestor_ids": [],
+  "device_integration_id": "${AWS_INTEGRATION_ID}",
   "tags": [ "demo" ],
   "log_config": {
     "local_level": "error",
@@ -137,6 +159,7 @@ cat <<EOF >"${FILE_NAME}"
 
 _GATEWAY_DEVICE_ID="${GATEWAY_DEVICE_ID}"
 _GATEWAY_DEVICE_TYPE_ID="${GATEWAY_DEVICE_TYPE_ID}"
+_AWS_INTEGRATION_ID="${AWS_INTEGRATION_ID}"
 
 FILE_NAME="${FILE_NAME}"
 EOF
@@ -165,6 +188,11 @@ curl --request DELETE \
 
 curl --request DELETE \
   --url "${BASE_URL}/device_types/${_GATEWAY_DEVICE_TYPE_ID}" \
+  --header 'accept: application/json' \
+  --header "authorization: ${_SESSION_API_KEY}"
+
+curl --request DELETE \
+  --url "${BASE_URL}/integrations/${_AWS_INTEGRATION_ID}" \
   --header 'accept: application/json' \
   --header "authorization: ${_SESSION_API_KEY}"
 

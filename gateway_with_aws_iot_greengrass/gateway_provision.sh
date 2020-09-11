@@ -37,17 +37,10 @@ ssh-keyscan -H "${GATEWAY_IP}" >> ~/.ssh/known_hosts
 
 ssh-copy-id -f "${GATEWAY_USERNAME}@${GATEWAY_IP}"
 
-# Update instance with Python 3 support to httpprint listener
+# Update instance
+# EdgeIQ & AWS IoT Greengrass requires python 3.7
 ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" \
-  "sudo sh -c 'apt-get update && apt-get upgrade --yes && apt-get install --yes python3 python3-pip'"
-
-# copy files to device Instance
-scp -r "${SCRIPT_DIR}/instance_files/"* \
-  "${GATEWAY_USERNAME}@${GATEWAY_IP}:./"
-
-# install ModBus Server simulator
-ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" \
-  "sudo /bin/bash ./diagslave_install.sh"
+  "sudo sh -c 'apt-get update && apt-get upgrade --yes && apt-get install --yes python3 python3.7 python3-pip'"
 
 # Install EdgeIQ SmartEdge
 EDGEIQ_INSTALL=$(cat <<EOF
@@ -64,7 +57,3 @@ EOF
 # printf "\nEIQ_INSTALL = %s\n" "${EDGEIQ_INSTALL}"
 
 ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" <<<"${EDGEIQ_INSTALL}"
-
-# install httpprint command
-ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" \
-  "sudo -H /bin/bash ./httpprint_install.sh"

@@ -37,6 +37,12 @@ ssh-keyscan -H "${GATEWAY_IP}" >> ~/.ssh/known_hosts
 
 ssh-copy-id -f "${GATEWAY_USERNAME}@${GATEWAY_IP}"
 
+<<<<<<< HEAD
+=======
+# Update instance
+# ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" \
+#   "sudo sh -c 'apt-get update && apt-get upgrade --yes'"
+>>>>>>> bd79c4eebb3c0e00ad3132dac19d78fa63316a00
 
 # Install EdgeIQ SmartEdge
 EDGEIQ_INSTALL=$(cat <<EOF
@@ -50,8 +56,11 @@ wget --quiet --output-document='install.sh' \
   --url https://api.edgeiq.io/api/v1/platform/installers/${GATEWAY_MANUFACTURER}/${GATEWAY_MODEL}/edge-${SMARTEDGE_VERSION}.run
 EOF
 )
-
 # printf "\nEIQ_INSTALL = %s\n" "${EDGEIQ_INSTALL}"
 
+<<<<<<< HEAD
 # shellcheck disable=SC2087
 ssh "${GATEWAY_USERNAME}" <<<"${EDGEIQ_INSTALL}"
+=======
+ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" <<<"${EDGEIQ_INSTALL}"
+>>>>>>> bd79c4eebb3c0e00ad3132dac19d78fa63316a00

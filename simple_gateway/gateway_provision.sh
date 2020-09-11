@@ -53,8 +53,6 @@ wget --quiet --output-document='install.sh' \
   --url https://api.edgeiq.io/api/v1/platform/installers/${GATEWAY_MANUFACTURER}/${GATEWAY_MODEL}/edge-${SMARTEDGE_VERSION}.run
 EOF
 )
-
 # printf "\nEIQ_INSTALL = %s\n" "${EDGEIQ_INSTALL}"
 
-# shellcheck disable=SC2087
 ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" <<<"${EDGEIQ_INSTALL}"

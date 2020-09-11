@@ -187,19 +187,19 @@ pretty_print_json 'Software Update' "${software_update_result}"
 
 SOFTWARE_UPDATE_ID=$(jq --raw-output '._id' <<<"${software_update_result}")
 
-SOFTWARE_UPDATE_IDS+=( "${SOFTWARE_UPDATE_ID}" )
-
-
-
-
 # Tell our gateway device to update it's config to see all these new changes
 # see also https://dev.edgeiq.io/reference#devices-gateway-commands-1
 printf "\nTelling the gateway to update it's configuration... Done.\n"
-curl --silent --request POST \
-  --url "https://api.edgeiq.io/api/v1/platform/devices/${GATEWAY_DEVICE_ID}/send_config" \
-  --header 'accept: application/json' \
-  --header "authorization: ${SESSION_API_KEY}" \
-  --header 'content-type: application/json'
+send_config_result=$(
+  curl --silent --request POST \
+    --url "${BASE_URL}/devices/${GATEWAY_DEVICE_ID}/send_config" \
+    --header 'accept: application/json' \
+    --header "authorization: ${SESSION_API_KEY}" \
+    --header 'content-type: application/json'
+)
+pretty_print_json 'Send Config' "${send_config_result}"
+
+# Create cleanup file
 
 # Create cleanup file
 # Create cleanup script with unique name generated using num seconds since Jan 1 1970

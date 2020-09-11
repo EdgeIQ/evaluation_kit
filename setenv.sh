@@ -17,15 +17,27 @@ export GATEWAY_UNIQUE_ID=${GATEWAY_UNIQUE_ID:-'<Unique id for Gateway>'}
 # IP Address of Gateway device
 export GATEWAY_IP=${GATEWAY_IP:-'<Gateway device IP>'}
 
+# EdgeIQ SmartEdge version
+export SMARTEDGE_VERSION='2.6.6'
+
 # Gateway's EdgeIQ device type
 # * Raspberry PI - 'rpf'
 # * x86_64 - 'generic'
 export GATEWAY_MANUFACTURER='rpf'
+# export GATEWAY_MANUFACTURER='generic'
 
 # Gateway's EdgeIQ device type
 # * Raspberry PI linux - 'rpi'
 # * x86_64 Linux - 'linux'
 export GATEWAY_MODEL='rpi'
+# export GATEWAY_MODEL='linux'
 
-# EdgeIQ SmartEdge version
-export SMARTEDGE_VERSION='2.6.5'
+# EdgeIQ / AWS Integration
+# see also: https://dev.edgeiq.io/docs/aws-iot
+
+export AWS_IOT_GG_URL=${AWS_IOT_GG_URL:-'https://d1onfpft10uf5o.cloudfront.net/greengrass-core/downloads/1.10.2/greengrass-linux-armv7l-1.10.2.tar.gz'}
+# export AWS_IOT_GG_URL=${AWS_IOT_GG_URL:-'https://d1onfpft10uf5o.cloudfront.net/greengrass-core/downloads/1.10.2/greengrass-linux-x86-64-1.10.2.tar.gz'}
+
+export AWS_IOT_REGION=${AWS_IOT_REGION:-'us-east-2'}
+export AWS_IOT_EXTERNAL_ID=${AWS_IOT_EXTERNAL_ID:-'<AWS external id>'}
+export AWS_IOT_ROLE_ARN=${AWS_IOT_ROLE_ARN:-'<AWS role arn>'}
