@@ -112,7 +112,7 @@ gateway_device_result=$(
   "heartbeat_period": 60,
   "heartbeat_values": [ "cpu_usage", "disk_usage", "ram_usage" ],
   "ingestor_ids": [],
-  "attached_device_ids": [ "${SENSOR_DEVICE_ID}" ],
+  "attached_device_ids": [  ],
   "tags": [ "demo" ],
   "log_config": {
     "local_level": "error",
@@ -187,9 +187,13 @@ pretty_print_json 'Software Update' "${software_update_result}"
 
 SOFTWARE_UPDATE_ID=$(jq --raw-output '._id' <<<"${software_update_result}")
 
+SOFTWARE_UPDATE_IDS+=( "${SOFTWARE_UPDATE_ID}" )
+
+
 # Tell our gateway device to update it's config to see all these new changes
 # see also https://dev.edgeiq.io/reference#devices-gateway-commands-1
-printf "\nTelling the gateway to update it's configuration... Done.\n"
+printf "\nTelling the gateway to update it's configuration."
+
 send_config_result=$(
   curl --silent --request POST \
     --url "${BASE_URL}/devices/${GATEWAY_DEVICE_ID}/send_config" \
@@ -287,9 +291,13 @@ sleep 2
 printf "\n\n"
 
 
-read -n1 -rsp "Please make a selection:" key
+read -n1 -rsp "
+Please make a selection:
+  1) execute the software update command on gateway via application
+  2) exit
+" key
 
-if [ "$key" = '' ]; then
+if [ "$key" = '1' ]; then
     printf "\nHold onto your butts...\n"
     gateway_command_result=$(
     curl --silent --request POST \
@@ -306,9 +314,9 @@ EOF
     )
 
     pretty_print_json 'Executing Software Update' "${gateway_command_result}"
-    SOFTWARE_UPDATE_ID=$(jq --raw-output '._id' <<<"${software_update_result}")
-    echo "Software Update executed."
+    software_exec_result=$(jq --raw-output '._id' <<<"${software_update_result}")
+    echo "Software Update executed via API."
 else
     # Anything else pressed, do whatever else.
-    printf "\nWrong key...\n"
+    printf "\nDone.\n"
 fi
