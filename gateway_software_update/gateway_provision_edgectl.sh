@@ -52,7 +52,7 @@ sudo apt update
 echo "Done."
 echo "Installing edgeiq-edgectl via apt... "
 sudo apt install edgeiq-edgectl
-echo -e "BLUE='\033[0;34m'Done."
+echo "Done."
 EOF
 )
 ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" <<<"${EDGEIQ_INSTALL}"
