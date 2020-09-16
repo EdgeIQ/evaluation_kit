@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-# This script will create a new gateway device type, device & software_update
-# - get device ID
-# - create software update config (simple apt-get update/upgrade/reboot)
-# - execute gateway command to update software
-#
 # Assumes the following tools are installed
 # * curl - tested against version 7.64.1
 # * jq - tested against version 1.6 (https://stedolan.github.io/jq)
@@ -24,6 +19,14 @@ trap print_error ERR
 trap "exit 1" TERM
 export TOP_PID=$$
 
+# Collect enttity IDs only to make it easier to automate demo resources
+declare -a TRANSLATOR_IDS
+declare -a INGESTOR_IDS
+declare -a DEVICE_TYPE_IDS
+declare -a DEVICE_IDS
+declare -a RULE_IDS
+declare -a SOFTWARE_UPDATE_IDS
+
 validate_environment
 
 SESSION_API_KEY=$(get_session_api_key)
@@ -38,11 +41,12 @@ curl --silent --request POST \
   --header 'content-type: application/json' \
   --data @- <<EOF
 {
-  "name": "Demo $(whoami)'s Device Type",
+  "name": "Demo Gateway Device Type",
   "long_description": "",
   "manufacturer": "${GATEWAY_MANUFACTURER}",
   "model": "${GATEWAY_MODEL}",
   "type": "gateway",
+  "ingestor_ids": [],
   "capabilities": {
     "network_connections": [
       { "type": "ethernet-wan", "name": "eth0" }
@@ -83,9 +87,11 @@ curl --silent --request POST \
 }
 EOF
 )
-pretty_print_json 'Device Type' "${gateway_device_type_result}"
+pretty_print_json 'Gateway Device Type' "${gateway_device_type_result}"
 
 GATEWAY_DEVICE_TYPE_ID=$(jq --raw-output '._id' <<<"${gateway_device_type_result}")
+
+DEVICE_TYPE_IDS+=( "${GATEWAY_DEVICE_TYPE_ID}" )
 
 # Create Gateway Device
 # valid log level values: trace, debug, info, warn, error, critical
@@ -100,12 +106,13 @@ gateway_device_result=$(
     --header 'content-type: application/json' \
     --data @- <<EOF
 {
-  "name": "Demo $(whoami)'s Gateway",
+  "name": "Demo Gateway",
   "device_type_id": "${GATEWAY_DEVICE_TYPE_ID}",
   "unique_id": "${GATEWAY_UNIQUE_ID}",
-  "heartbeat_period": 120,
-  "heartbeat_values": [ "cpu_usage" ],
+  "heartbeat_period": 60,
+  "heartbeat_values": [ "cpu_usage", "disk_usage", "ram_usage" ],
   "ingestor_ids": [],
+  "attached_device_ids": [  ],
   "tags": [ "demo" ],
   "log_config": {
     "local_level": "error",
@@ -115,9 +122,47 @@ gateway_device_result=$(
 }
 EOF
 )
-pretty_print_json 'Device' "${gateway_device_result}"
+pretty_print_json 'Gateway Device' "${gateway_device_result}"
 
 GATEWAY_DEVICE_ID=$(jq --raw-output '._id' <<<"${gateway_device_result}")
+
+DEVICE_IDS+=( "${GATEWAY_DEVICE_ID}" )
+
+# Create Relay Rule to forward all reports to EdgeIQ cloud
+# see also https://dev.edgeiq.io/reference#post_rules
+relay_rule_result=$(
+  curl --silent --request POST \
+    --url "${BASE_URL}/rules" \
+    --header 'accept: application/json' \
+    --header "authorization: ${SESSION_API_KEY}" \
+    --header 'content-type: application/json' \
+    --data @- <<EOF
+{
+  "description": "Demo Relay All to the Cloud",
+  "active": true,
+  "cloud_rule": false,
+  "then_actions": [ { "type": "relay" } ],
+  "rule_condition": { "type": "true" }
+}
+EOF
+)
+pretty_print_json 'Relay Rule' "${relay_rule_result}"
+
+RELAY_RULE_ID=$(jq --raw-output '._id' <<<"${relay_rule_result}")
+
+RULE_IDS+=( "${RELAY_RULE_ID}" )
+
+# Associate Relay Rule
+# see also https://dev.edgeiq.io/reference#put_attach_rule_to_device_type
+# Note: you can also associate Rules with individual Devices
+printf "\nAssociate Relay Rule with Gateway Device Type\n"
+curl --silent --request PUT \
+  --url "${BASE_URL}/device_types/${GATEWAY_DEVICE_TYPE_ID}/rules/${RELAY_RULE_ID}" \
+  --header 'accept: application/json' \
+  --header "authorization: ${SESSION_API_KEY}" \
+  --header 'content-type: application/json'
+
+
 
 # Create Software Update
 # files: array of name/link combo for files to be downloaded to gateway and executed
@@ -127,26 +172,28 @@ GATEWAY_DEVICE_ID=$(jq --raw-output '._id' <<<"${gateway_device_result}")
 software_update_result=$(
   curl --silent --request POST \
     --url "${BASE_URL}/software_updates" \
-    --header 'accept: application/json' \
+    --header "accept: application/json" \
     --header "authorization: ${SESSION_API_KEY}" \
     --header 'content-type: multipart/form-data; boundary=---011000010111000001101001' \
     --data @- <<EOF
 {
-  "name": "Demo Software Update"
+  "name": "Demo Software Update",
   "device_type_id": "${GATEWAY_DEVICE_TYPE_ID}",
-  "files": NULL,
-  "script": "apt-get update; apt-get upgrade -f -m -y;",
-  "reboot": true,
+  "script": "DATETIME1=`date`; logger \"edge: SOFTWARE UPDATE: Beginning update command at: \${DATETIME1}\"; apt update; apt upgrade -fmy; DATETIME2=`date`; logger \"edge: SOFTWARE UPDATE: Finished update command at: \${DATETIME2}\";"
 }
 EOF
 )
-pretty_print_json 'Device' "${software_update_result}"
+pretty_print_json 'Software Update' "${software_update_result}"
 
 SOFTWARE_UPDATE_ID=$(jq --raw-output '._id' <<<"${software_update_result}")
 
+SOFTWARE_UPDATE_IDS+=( "${SOFTWARE_UPDATE_ID}" )
+
+
 # Tell our gateway device to update it's config to see all these new changes
 # see also https://dev.edgeiq.io/reference#devices-gateway-commands-1
-printf "\nTelling the gateway to update it's configuration... Done.\n"
+printf "\nTelling the gateway to update it's configuration."
+
 send_config_result=$(
   curl --silent --request POST \
     --url "${BASE_URL}/devices/${GATEWAY_DEVICE_ID}/send_config" \
@@ -158,6 +205,7 @@ pretty_print_json 'Send Config' "${send_config_result}"
 
 # Create cleanup file
 
+# Create cleanup file
 # Create cleanup script with unique name generated using num seconds since Jan 1 1970
 FILE_NAME="cleanup-demo-$(date '+%s').sh"
 
@@ -165,9 +213,12 @@ FILE_NAME="cleanup-demo-$(date '+%s').sh"
 cat <<EOF >"${FILE_NAME}"
 #!/usr/bin/env bash
 
-_GATEWAY_DEVICE_ID="${GATEWAY_DEVICE_ID}"
-_GATEWAY_DEVICE_TYPE_ID="${GATEWAY_DEVICE_TYPE_ID}"
-_SOFTWARE_UPDATE_ID="${SOFTWARE_UPDATE_ID}"
+declare -ar _DEVICE_IDS=( ${DEVICE_IDS[@]} )
+declare -ar _DEVICE_TYPE_IDS=( ${DEVICE_TYPE_IDS[@]} )
+declare -ar _TRANSLATOR_IDS=( ${TRANSLATOR_IDS[@]} )
+declare -ar _INGESTOR_IDS=( ${INGESTOR_IDS[@]} )
+declare -ar _RULE_IDS=( ${RULE_IDS[@]} )
+declare -ar _SOFTWARE_UPDATE_IDS=( ${SOFTWARE_UPDATE_IDS[@]} )
 
 FILE_NAME="${FILE_NAME}"
 EOF
@@ -188,23 +239,84 @@ trap "exit 1" TERM
 export TOP_PID=$$
 
 _SESSION_API_KEY=$(get_session_api_key)
-
-curl --request DELETE \
-  --url "${BASE_URL}/devices/${_GATEWAY_DEVICE_ID}" \
-  --header 'accept: application/json' \
-  --header "authorization: ${_SESSION_API_KEY}"
-
-curl --request DELETE \
-  --url "${BASE_URL}/device_types/${_GATEWAY_DEVICE_TYPE_ID}" \
-  --header 'accept: application/json' \
-  --header "authorization: ${_SESSION_API_KEY}"
-
-curl --request DELETE \
-    --url "${BASE_URL}/software_update/${_SOFTWARE_UPDATE_ID}" \
+echo "Cleaning: Devices"
+for id in "${_DEVICE_IDS[@]}"; do
+  curl --request DELETE \
+    --url "${BASE_URL}/devices/${id}" \
     --header 'accept: application/json' \
     --header "authorization: ${_SESSION_API_KEY}"
+done
+echo "Cleaning: Device Types"
+for id in "${_DEVICE_TYPE_IDS[@]}"; do
+  curl --request DELETE \
+    --url "${BASE_URL}/device_types/${id}" \
+    --header 'accept: application/json' \
+    --header "authorization: ${_SESSION_API_KEY}"
+done
+echo "Cleaning: Ingestors"
+for id in "${_INGESTOR_IDS[@]}"; do
+  curl --request DELETE \
+    --url "${BASE_URL}/ingestors/${id}" \
+    --header 'accept: application/json' \
+    --header "authorization: ${_SESSION_API_KEY}"
+done
+echo "Cleaning: Translators"
+for id in "${_TRANSLATOR_IDS[@]}"; do
+  curl --request DELETE \
+    --url "${BASE_URL}/translators/${id}" \
+    --header 'accept: application/json' \
+    --header "authorization: ${_SESSION_API_KEY}"
+done
+echo "Cleaning: Rules"
+for id in "${_RULE_IDS[@]}"; do
+  curl --request DELETE \
+    --url "${BASE_URL}/rules/${id}" \
+    --header 'accept: application/json' \
+    --header "authorization: ${_SESSION_API_KEY}"
+done
+echo "Cleaning: Software Updates"
+for id in "${_SOFTWARE_UPDATE_IDS[@]}"; do
+  curl --request DELETE \
+    --url "${BASE_URL}/software_updates/${id}" \
+    --header 'accept: application/json' \
+    --header "authorization: ${_SESSION_API_KEY}"
+done
 
 rm -- "${FILE_NAME}"
 EOF
 
 chmod a+x "${FILE_NAME}"
+
+sleep 2
+printf "\n\n"
+
+
+read -n1 -rsp "
+Please make a selection:
+  1) execute the software update command on gateway via application
+  2) exit
+" key
+
+if [ "$key" = '1' ]; then
+    printf "\nHold onto your butts...\n"
+    gateway_command_result=$(
+    curl --silent --request POST \
+      --url "${BASE_URL}/devices/${GATEWAY_DEVICE_ID}/gateway_commands" \
+      --header "accept: application/json" \
+      --header "authorization: ${SESSION_API_KEY}" \
+      --header "content-type: application/json" \
+      --data @- <<EOF
+{
+"command_type": "software_update",
+"software_update_id": "${SOFTWARE_UPDATE_ID}"
+}
+EOF
+    )
+
+    pretty_print_json 'Executing Software Update' "${gateway_command_result}"
+    software_exec_result=$(jq --raw-output '._id' <<<"${software_update_result}")
+    echo "Software Update executed via API."
+else
+    # Anything else pressed, do whatever else.
+    printf "\nDone.\n"
+fi
