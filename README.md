@@ -32,7 +32,7 @@ The EdgeIQ local service is installed as a `systemd` managed service called `edg
 Note: you will need to run the `cleanup-demo-<timestamp>.sh` script between running each example as only one EdgeIQ Device can exist against a single `Unique_Id`.
 
 ### Simple Gateway example
-
+<details>
 In `simple_gateway` subdirectory, run the following commands.
 
 1. Run [`create_edgeiq_configuration.sh`](simple_gateway/create_edgeiq_configuration.sh). This will configure an EdgeIQ Device that can be used to remotely manage your gateway
@@ -41,9 +41,9 @@ In `simple_gateway` subdirectory, run the following commands.
 The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timestamp>.sh` file that contains API commands to delete EdgeIQ artifacts created by the create script. The cleanup scripts will delete themselves upon successful completion.
 
 There is a helper script [`query_entities.sh`](simple_gateway/query_entities.sh) that provides examples of various ways to query artifacts from EdgeIQ.
-
+</details>
 ### Gateway with ModBus Sensor Device
-
+<details>
 This example shows how EdgeIQ can be configured to manage an edge gateway device with a connected Modbus sensor. The sensor data will be forwarded to an HTTP listener. The [`httpprint.py`](gateway_with_modbus_sensor/instance_files/httpprint.py) is an example of such a listener that will print out all HTTP messages that it receives.
 
 Notes:
@@ -65,9 +65,9 @@ There are some helper scripts:
 * [`diagslave_install.sh`](gateway_with_modbus_sensor/instance_files/diagslave_install.sh) is an example of how to install diagslave Modbus simulator as a systemd service. Must be run as root, e.g., `sudo ./diagslave_install.sh`. You can then use `journalctl -f --all -u diagslave` to follow logs. Note the `--all` options overcomes the `[xxB blob data]` by converting the binary output from diagslave.
 
 The Modbus sensor/simulator and the HTTP Listener should be running **BEFORE** running these scripts.
-
+</details>
 ### Gateway with Attached ModBus Sensor Device
-
+<details>
 This example shows how EdgeIQ can be configured to manage an edge gateway device with a connected Modbus sensor. The ModBus sensor is modeled as an attached device to the Gateway device. Otherwise this example is identical to Gateway with ModBus Sensor example. The sensor data will be forwarded to an HTTP listener. The [`httpprint.py`](gateway_with_attached_sensor/instance_files/httpprint.py) is an example of such a listener that will print out all HTTP messages that it receives.
 
 Notes:
@@ -90,9 +90,9 @@ There are some helper scripts:
 * [`diagslave_install.sh`](gateway_with_attached_sensor/diagslave_install.sh) is an example of how to install diagslave Modbus simulator as a systemd service. Must be run as root, e.g., `sudo ./diagslave_install.sh`. You can then use `journalctl -f --all -u diagslave` to follow logs. Note the `--all` options overcomes the `[xxB blob data]` by converting the binary output from diagslave.
 
 The Modbus sensor/simulator and the HTTP Listener should be running **BEFORE** running these scripts.
-
+</details>
 ### Gateway with Attached SNMP Sensor Device
-
+<details>
 This example shows how EdgeIQ can be configured to manage an edge gateway device with a connected SNMP sensor. The SNMP sensor is modeled as an attached device to the Gateway device. The sensor data will be forwarded to an HTTP listener. The [`httpprint.py`](gateway_with_attached_sensor_snmp/instance_files/httpprint.py) is an example of such a listener that will print out all HTTP messages that it receives.
 
 
@@ -114,9 +114,9 @@ There are some helper scripts:
 
 * [`query_entities.sh`](gateway_with_attached_sensor_snmp/query_entities.sh) provides examples of querying EdgeIQ for specific devices based on `unique_id` and that have a `demo` tag. More details on Query parameters [here](https://dev.edgeiq.io/docs/api-overrview#query-string-operators)
 
-
+</details>
 ### Gateway with Attached Ping/Latency Sensor Device Using Shell Polling
-
+<details>
 This example shows how EdgeIQ can be configured to manage an edge gateway device with a connected latency sensor (i.e. ping a downstream device from the gateway). The latency sensor is modeled as an attached device to the Gateway device, with an attached Ingestor that performs the shell polling.
 
 
@@ -124,3 +124,14 @@ This example shows how EdgeIQ can be configured to manage an edge gateway device
 2. Run [`gateway_provision.sh`](gateway_with_attached_sensor_ping/gateway_provision.sh). This will install the EdgeIQ SmartEdge software onto the gateway and associate it with the EdgeIQ Device configured in the previous step.
 
 The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timestamp>.sh` file that contains API commands to delete EdgeIQ artifacts created by the create script. The cleanup scripts will delete themselves upon successful completion.
+</details>
+### Gateway with Software Update
+<details>
+This example shows how to create and send a Software Update command in the EdgeIQ platform.
+
+
+1. Run [`create_edgeiq_configuration.sh`](gateway_with_attached_sensor_ping/create_edgeiq_configuration.sh). This will configure an EdgeIQ Device for Gateway and Sensor, Device Types for each, Ingestor, Translator, and Policies that can be used to remotely manage your gateway and endpoint devices.
+2. Run [`gateway_provision.sh`](gateway_with_attached_sensor_ping/gateway_provision.sh). This will install the EdgeIQ SmartEdge software onto the gateway and associate it with the EdgeIQ Device configured in the previous step.
+
+The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timestamp>.sh` file that contains API commands to delete EdgeIQ artifacts created by the create script. The cleanup scripts will delete themselves upon successful completion.
+</details>
