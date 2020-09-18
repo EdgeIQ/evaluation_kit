@@ -146,3 +146,31 @@ This example shows how to create and send a Software Update command in the EdgeI
 
 The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timestamp>.sh` file that contains API commands to delete EdgeIQ artifacts created by the create script. The cleanup scripts will delete themselves upon successful completion.
 </details>
+
+### Transferring Escrow Devices
+
+<details>
+
+<summary>Expand</summary>
+This example walks through the process to onboard and transfer an Escrow Device. See <[https://dev.edgeiq.io/docs/escrow-devices-and-transfers](https://dev.edgeiq.io/docs/escrow-devices-and-transfers)>
+![https://files.readme.io/ae55db6-escrow_workflow.png](https://files.readme.io/ae55db6-escrow_workflow.png)
+#This script will perform the following actions:
+
+ - Create two subaccounts under your account: "Demo Manufacturer" and "Demo Customer"
+ - Create a User for each subaccount
+ - Create Device Type & Device in "Demo Manufacturer" account
+ - Provision gateway device & create token ID on device: `/opt/escrow_token`
+ - Create Escrow Device on "Demo Manufacturer"
+ - Create Device Transfer Request on "Demo Manufacturer"
+ - Get Device Transfer Request Status/Errors on "Demo Manufacturer"
+ - Accept devices on "Demo Customer" subaccounts
+ - Create Software Update & execute on device
+
+Steps involved:
+1. Run [`step1_create_escrow`](gateway_with_attached_sensor_ping/create_edgeiq_configuration.sh). This will configure an EdgeIQ Device for Gateway and Sensor, Device Types for each, Ingestor, Translator, and Policies that can be used to remotely manage your gateway and endpoint devices.
+2. Run [`step2_gateway_provision.sh`](gateway_with_attached_sensor_ping/gateway_provision.sh). This will install the EdgeIQ SmartEdge software onto the gateway and associate it with the EdgeIQ Device configured in the previous step.
+3. Run [`step3_gateway_provision.sh`](gateway_with_attached_sensor_ping/gateway_provision.sh). This will install the EdgeIQ SmartEdge software onto the gateway and associate it with the EdgeIQ Device configured in the previous step.
+
+
+The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timestamp>.sh` file that contains API commands to delete EdgeIQ artifacts created by the create script. The cleanup scripts will delete themselves upon successful completion.
+</details>
