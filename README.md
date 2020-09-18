@@ -153,9 +153,8 @@ The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timesta
 
 <summary>Expand</summary>
 
-This example walks through the process to onboard and transfer an Escrow Device. See:
-https://dev.edgeiq.io/docs/escrow-devices-and-transfers
-https://files.readme.io/ae55db6-escrow_workflow.png
+This example walks through the process to onboard and transfer an Escrow Device. See [documentation](https://dev.edgeiq.io/docs/escrow-devices-and-transfers) for workflow details.
+
 
 This script will perform the following actions:
 
