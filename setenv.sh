@@ -18,7 +18,7 @@ export GATEWAY_UNIQUE_ID=${GATEWAY_UNIQUE_ID:-'<Unique id for Gateway>'}
 export GATEWAY_IP=${GATEWAY_IP:-'<Gateway device IP>'}
 
 # EdgeIQ SmartEdge version
-export SMARTEDGE_VERSION='2.7.1'
+export SMARTEDGE_VERSION='2.6.6'
 
 # Gateway's EdgeIQ device type
 # * Raspberry PI - 'rpf'
@@ -44,5 +44,4 @@ export AWS_IOT_ROLE_ARN=${AWS_IOT_ROLE_ARN:-'<AWS role arn>'}
 
 # EdgeIQ Escrow token
 # This can be any random string, unique to your account.
-#
 export ESCROW_TOKEN=${ESCROW_TOKEN:-'EVALKIT918374698173649523'}

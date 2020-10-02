@@ -17,7 +17,6 @@ validate_environment
 
 SESSION_API_KEY=$(get_session_api_key)
 
-
 user_request=$(
   curl --silent --request GET \
     --url "${BASE_URL}/me" \
@@ -38,6 +37,12 @@ ssh-keyscan -H "${GATEWAY_IP}" >> ~/.ssh/known_hosts
 
 ssh-copy-id -f "${GATEWAY_USERNAME}@${GATEWAY_IP}"
 
+# Put escrow token in the /opt/escrow_token file
+# resolve ESCROW_TOKEN variable into string command to be run on remote gateway
+ESCROW_TOKEN_COMMAND="sudo bash -c 'cat /dev/null > /opt/escrow_token && echo ${ESCROW_TOKEN} >> /opt/escrow_token'"
+
+ssh -tq "${GATEWAY_USERNAME}@${GATEWAY_IP}" <<<"${ESCROW_TOKEN_COMMAND}"
+
 # Install EdgeIQ SmartEdge
 EDGEIQ_INSTALL=$(cat <<EOF
 wget --quiet --output-document='install.sh' \
@@ -52,5 +57,4 @@ EOF
 )
 # printf "\nEIQ_INSTALL = %s\n" "${EDGEIQ_INSTALL}"
 
-# Put escrow token in the /opt/escrow_token file
-ssh -tq "${GATEWAY_USERNAME}@${GATEWAY_IP}" "sudo bash -c 'cat /dev/null > /opt/escrow_token && echo "${ESCROW_TOKEN}" >> /opt/escrow_token'"
+ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" <<<"${EDGEIQ_INSTALL}"
