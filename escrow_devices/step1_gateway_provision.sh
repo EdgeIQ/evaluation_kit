@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-#
-# This script will check for apt, add the EdgeIQ repository,
-# and install the edgeiq-edgectl package if available
+
 # Get directory this script is located in to access script local files
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
@@ -18,6 +16,7 @@ export TOP_PID=$$
 validate_environment
 
 SESSION_API_KEY=$(get_session_api_key)
+
 
 user_request=$(
   curl --silent --request GET \
@@ -39,20 +38,19 @@ ssh-keyscan -H "${GATEWAY_IP}" >> ~/.ssh/known_hosts
 
 ssh-copy-id -f "${GATEWAY_USERNAME}@${GATEWAY_IP}"
 
-# Install EdgeIQ SmartEdge service
-
+# Install EdgeIQ SmartEdge
 EDGEIQ_INSTALL=$(cat <<EOF
-echo "Adding EdgeIQ repository to apt sources... "
-sudo echo "deb [trusted=yes] https://apt.fury.io/machineshop/ /" > /etc/apt/sources.list.d/fury.list
-echo "Done."
-echo "Here's what it looks like:"
-sudo cat /etc/apt/sources.list.d/fury.list
-echo "Running apt update... "
-sudo apt update
-echo "Done."
-echo "Installing edgeiq-edgectl via apt... "
-sudo apt install edgeiq-edgectl
-echo "Done."
+wget --quiet --output-document='install.sh' \
+  'https://api.edgeiq.io/api/v1/platform/installers/install.sh' \
+  && sudo /bin/bash install.sh \
+  --env 'prod' \
+  --company ${company_id} \
+  --make ${GATEWAY_MANUFACTURER} \
+  --model ${GATEWAY_MODEL} \
+  --url https://api.edgeiq.io/api/v1/platform/installers/${GATEWAY_MANUFACTURER}/${GATEWAY_MODEL}/edge-${SMARTEDGE_VERSION}.run
 EOF
 )
-ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" <<<"${EDGEIQ_INSTALL}"
+# printf "\nEIQ_INSTALL = %s\n" "${EDGEIQ_INSTALL}"
+
+# Put escrow token in the /opt/escrow_token file
+ssh -tq "${GATEWAY_USERNAME}@${GATEWAY_IP}" "sudo bash -c 'cat /dev/null > /opt/escrow_token && echo "${ESCROW_TOKEN}" >> /opt/escrow_token'"
