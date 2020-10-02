@@ -203,16 +203,14 @@ USER_IDS+=( "${USER_CUS_ID}" )
 
 
 
-# Switch to CUS user account to create Device Type
+# Switch to MFG user
 #
 #
-printf "\n\nSwitching to CUS user for API\n\n"
-printf "${SESSION_API_KEY}\n\n"
+printf "\n\nSwitching to MFG user for API\n\n"
 #ADMIN_EMAIL="demo+evalkit_democususer${random_id}@edgeiq.io"
 #demo+evalkit_demomfguser${random_id}@edgeiq.io
 #ADMIN_PASSWORD=${user_mfg_pw}
-SESSION_API_KEY=${USER_CUS_API_TOKEN}
-#printf "${SESSION_API_KEY}\n\n"
+SESSION_API_KEY=${USER_MFG_API_TOKEN}
 
 
 # Create Gateway Device Type
@@ -227,7 +225,7 @@ curl --silent --request POST \
   --header 'content-type: application/json' \
   --data @- <<EOF
 {
-  "name": "Demo CUS Gateway Device Type",
+  "name": "Demo Gateway Device Type - copied from MFG",
   "long_description": "",
   "manufacturer": "${GATEWAY_MANUFACTURER}",
   "model": "${GATEWAY_MODEL}",
@@ -281,15 +279,6 @@ DEVICE_TYPE_IDS+=( "${GATEWAY_DEVICE_TYPE_ID}" )
 
 
 
-# Switch to MFG user
-#
-#
-printf "\n\nSwitching to MFG user for API\n\n"
-#ADMIN_EMAIL="demo+evalkit_democususer${random_id}@edgeiq.io"
-#demo+evalkit_demomfguser${random_id}@edgeiq.io
-#ADMIN_PASSWORD=${user_mfg_pw}
-SESSION_API_KEY=${USER_MFG_API_TOKEN}
-
 # Create Escrow Device
 #
 #
@@ -335,10 +324,6 @@ pretty_print_json 'Device Transfer Request' "${device_transfer_request_result}"
 DEVICE_TRANSFER_REQUEST_ID=$(jq --raw-output '._id' <<<"${device_transfer_request_result}")
 
 #DEVICE_TRANSFER_REQUEST_IDS+=( "${ESCROW_DEVICE_ID}" )
-
-
-
-#DEVICE_TRANSFER_REQUEST_ID=$(jq --raw-output '._id' <<<"${initiate_transfer_result}")
 
 
 
