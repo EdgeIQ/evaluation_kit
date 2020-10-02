@@ -153,26 +153,26 @@ The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timesta
 
 <summary>Expand</summary>
 
-This example walks through the process to onboard and transfer an Escrow Device. See [documentation](https://dev.edgeiq.io/docs/escrow-devices-and-transfers) for workflow details.
+This example walks through the process to onboard and transfer an Escrow Device. See [documentation](https://dev.edgeiq.io/docs/escrow-devices-and-transfers) for workflow details. In this example, 3 accounts are involved: your main account ("MAIN") and two subaccounts ("MFG" and "CUS").
 
-
-This script will perform the following actions:
-
- - Create two subaccounts under your account: "Demo Manufacturer" and "Demo Customer"
- - Create a User for each subaccount
- - Create Device Type & Device in "Demo Manufacturer" account
- - Provision gateway device & create token ID on device: `/opt/escrow_token`
- - Create Escrow Device on "Demo Manufacturer"
- - Create Device Transfer Request on "Demo Manufacturer"
- - Get Device Transfer Request Status/Errors on "Demo Manufacturer"
- - Accept devices on "Demo Customer" subaccounts
- - Create Software Update & execute on device
 
 Steps involved:
-1. Run [`step1_create_escrow`](gateway_with_attached_sensor_ping/create_edgeiq_configuration.sh). This will configure an EdgeIQ Device for Gateway and Sensor, Device Types for each, Ingestor, Translator, and Policies that can be used to remotely manage your gateway and endpoint devices.
-2. Run [`step2_gateway_provision.sh`](gateway_with_attached_sensor_ping/gateway_provision.sh). This will install the EdgeIQ SmartEdge software onto the gateway and associate it with the EdgeIQ Device configured in the previous step.
-3. Run [`step3_gateway_provision.sh`](gateway_with_attached_sensor_ping/gateway_provision.sh). This will install the EdgeIQ SmartEdge software onto the gateway and associate it with the EdgeIQ Device configured in the previous step.
+1. Run [`step1_gateway_provision.sh`](gateway_with_attached_sensor_ping/create_edgeiq_configuration.sh). This will:
+- MAIN: Install the EdgeIQ SmartEdge software onto the gateway`
+- MAIN: Load `ESCROW_TOKEN` onto devie at `/opt/escrow_token`
+- CUS: Create Device Type
+- MFG: Create Escrow Device
 
+2. Run [`step2_create_edgeiq_configuration.sh`](gateway_with_attached_sensor_ping/gateway_provision.sh). This will:
+
+- MAIN: Create two company subaccounts under your account: "Demo MFG" and "Demo CUS"
+- MAIN: Create a User for each subaccount with randomly generated passwords
+- MFG: Create Escrow Device
+- MFG: Create Device Transfer Request
+- MFG: Issue Transfer Request
+- CUS: Create Device Type
+- CUS: Accept Request
+- CUS: Create Software Update & execute on device using CUS credentials
 
 The `create_edgeiq_configuration.sh` script will create a `cleanup-demo-<timestamp>.sh` file that contains API commands to delete EdgeIQ artifacts created by the create script. The cleanup scripts will delete themselves upon successful completion.
 </details>
