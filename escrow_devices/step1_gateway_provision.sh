@@ -17,6 +17,7 @@ validate_environment
 
 SESSION_API_KEY=$(get_session_api_key)
 
+
 user_request=$(
   curl --silent --request GET \
     --url "${BASE_URL}/me" \
@@ -51,4 +52,5 @@ EOF
 )
 # printf "\nEIQ_INSTALL = %s\n" "${EDGEIQ_INSTALL}"
 
-ssh "${GATEWAY_USERNAME}@${GATEWAY_IP}" <<<"${EDGEIQ_INSTALL}"
+# Put escrow token in the /opt/escrow_token file
+ssh -tq "${GATEWAY_USERNAME}@${GATEWAY_IP}" "sudo bash -c 'cat /dev/null > /opt/escrow_token && echo "${ESCROW_TOKEN}" >> /opt/escrow_token'"
