@@ -19,7 +19,7 @@ trap print_error ERR
 trap "exit 1" TERM
 export TOP_PID=$$
 
-# Collect enttity IDs only to make it easier to automate demo resources
+# Collect entity IDs only to make it easier to automate demo resources
 declare -a TRANSLATOR_IDS
 declare -a INGESTOR_IDS
 declare -a DEVICE_TYPE_IDS
@@ -81,9 +81,10 @@ modbus_ingestor_result=$(
 {
   "name": "Demo $(whoami)'s Modbus Ingestor",
   "cloud_translator": false,
+  "type": "edge",
+  "target_template": "{{.Device.Metadata.ip_address}}",
   "listener_type": "tcp_modbus",
     "listener": {
-      "host": "127.0.0.1",
       "params": {
         "address": "1",
         "and_mask": 0,
@@ -174,15 +175,10 @@ sensor_device_result=$(
   "device_type_id": "${SENSOR_DEVICE_TYPE_ID}",
   "unique_id": "${GATEWAY_UNIQUE_ID}-sensor-1",
   "heartbeat_period": 120,
-  "heartbeat_values": [],
-  "ingestor_ids": [],
-  "attached_device_ids": [],
-  "tags": [ "demo" ],
-  "log_config": {
-    "local_level": "error",
-    "forward_level": "error",
-    "forward_frequency_limit": 60
-  }
+  "metadata": {
+    "ip_address": "127.0.0.1"
+  },
+  "tags": [ "demo" ]
 }
 EOF
 )

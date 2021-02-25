@@ -19,7 +19,7 @@ trap print_error ERR
 trap "exit 1" TERM
 export TOP_PID=$$
 
-# Collect enttity IDs only to make it easier to automate demo resources
+# Collect entity IDs only to make it easier to automate demo resources
 declare -a TRANSLATOR_IDS
 declare -a INGESTOR_IDS
 declare -a DEVICE_TYPE_IDS
